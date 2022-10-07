@@ -1,0 +1,26 @@
+package tech.jhamill34.repl.commands;
+
+import com.google.inject.Inject;
+import tech.jhamill34.entities.Entity;
+import tech.jhamill34.entities.EntityVisitor;
+import tech.jhamill34.repl.executors.Command;
+
+import java.util.List;
+import java.util.Stack;
+
+public class DescribeCommand implements Command {
+    @Inject
+    private EntityVisitor entityVisitor;
+
+    @Override
+    public String execute(Stack<Object> stack, List<String> operands) {
+        Object top = stack.pop();
+
+        if (top instanceof Entity) {
+            Entity entity = (Entity) top;
+            return entity.accept(entityVisitor);
+        }
+
+        return "Invalid stack state, expected an entity on the top of the stack: " + top;
+    }
+}

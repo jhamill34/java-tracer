@@ -1,0 +1,57 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'io.freefair.lombok' version '6.5.1'
+}
+
+group 'tech.jhamill34'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.ow2.asm:asm:9.3'
+    implementation 'org.ow2.asm:asm-util:9.3'
+    implementation 'org.ow2.asm:asm-commons:9.3'
+
+    implementation 'org.postgresql:postgresql:42.5.0'
+    implementation 'com.zaxxer:HikariCP:5.0.1'
+
+    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'com.google.guava:guava:31.1-jre'
+
+    implementation 'com.google.inject:guice:5.1.0'
+
+    implementation 'info.picocli:picocli:4.6.3'
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
+    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.19.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+}
+
+jar {
+    manifest {
+        attributes (
+//                "Agent-Class": "tech.jhamill34.agent.Agent",
+//                "Can-Redefine-Classes": "true",
+//                "Can-Retransform-Classes": "true",
+//                "Premain-Class": "tech.jhamill34.agent.Agent",
+                "Main-Class": "tech.jhamill34.Main"
+        )
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register('path') {
+    doLast {
+        println sourceSets.main.runtimeClasspath.asPath
+    }
+}
