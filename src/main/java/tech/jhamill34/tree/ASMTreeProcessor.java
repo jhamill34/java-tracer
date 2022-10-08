@@ -52,6 +52,8 @@ public class ASMTreeProcessor implements BytecodeTreeProcessor {
     @Override
     public void process(String name, String parent, ClassNode node) {
         int classId = classRepository.save(transformClass(node, parent));
+        classRepository.recordSuperClass(classId, node.superName);
+        classRepository.recordInterfaces(classId, node.interfaces);
 
         for (FieldNode fieldNode : node.fields) {
             fieldRepository.save(transformField(fieldNode, classId));
@@ -78,14 +80,6 @@ public class ASMTreeProcessor implements BytecodeTreeProcessor {
                 if (insnNode instanceof LineNumberNode) {
                     LineNumberNode lineNumberNode = (LineNumberNode) insnNode;
                     currentLineNumber = lineNumberNode.line;
-                }
-
-                if (insnNode instanceof MethodInsnNode) {
-
-                }
-
-                if (insnNode instanceof FieldInsnNode) {
-
                 }
 
                 int instructionId = instructionRepository.save(transformInstruction(insnNode, methodId, currentLineNumber, i));

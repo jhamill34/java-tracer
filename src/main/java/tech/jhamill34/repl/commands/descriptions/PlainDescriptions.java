@@ -1,5 +1,6 @@
 package tech.jhamill34.repl.commands.descriptions;
 
+import com.google.inject.Inject;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import tech.jhamill34.analyze.IdValue;
@@ -8,8 +9,22 @@ import tech.jhamill34.entities.EntityVisitor;
 import tech.jhamill34.entities.FieldEntity;
 import tech.jhamill34.entities.InstructionEntity;
 import tech.jhamill34.entities.MethodEntity;
+import tech.jhamill34.tree.ClassRepository;
+import tech.jhamill34.tree.FieldRepository;
+import tech.jhamill34.tree.MethodRepository;
+
+import java.util.Collection;
 
 public class PlainDescriptions implements EntityVisitor, Opcodes {
+    @Inject
+    private ClassRepository classRepository;
+
+    @Inject
+    private MethodRepository methodRepository;
+
+    @Inject
+    private FieldRepository fieldRepository;
+
     @Override
     public String visitClassEntity(ClassEntity classEntity) {
         StringBuilder sb = new StringBuilder();
@@ -24,6 +39,40 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
 
         sb.append("Access: ");
         appendAccess(classEntity.getAccess(), sb);
+        sb.append('\n');
+
+        int superClassId = classRepository.getSuperClassId(classEntity.getId());
+        sb.append("SuperClass: ").append(superClassId).append('\n');
+
+        Collection<Integer> interfaceIds = classRepository.getInterfaceIds(classEntity.getId());
+        sb.append("Implemented Interfaces: ").append('\n');
+        for (int interfaceId : interfaceIds) {
+            sb.append('\t').append(interfaceId).append('\n');
+        }
+
+        Collection<Integer> subClasses = classRepository.getSubclassIds(classEntity.getId());
+        sb.append("SubClasses: ").append('\n');
+        for (int subClassId : subClasses) {
+            sb.append('\t').append(subClassId).append('\n');
+        }
+
+        Collection<Integer> implementorIds = classRepository.getImplementorIds(classEntity.getId());
+        sb.append("Implementors: ").append('\n');
+        for (int implementorId : implementorIds) {
+            sb.append('\t').append(implementorId).append('\n');
+        }
+
+        sb.append("Fields: ").append('\n');
+        Collection<Integer> fieldIds = fieldRepository.allFieldsForOwner(classEntity.getId());
+        for (int fieldId : fieldIds) {
+            sb.append('\t').append(fieldId).append('\n');
+        }
+
+        sb.append("Methods: ").append('\n');
+        Collection<Integer> methodIds = methodRepository.allMethodsForOwner(classEntity.getId());
+        for (int methodId : methodIds) {
+            sb.append('\t').append(methodId).append('\n');
+        }
 
         return sb.toString();
     }
