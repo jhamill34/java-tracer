@@ -4,6 +4,7 @@ import tech.jhamill34.entities.MethodEntity;
 import tech.jhamill34.tree.MethodRepository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -51,6 +52,10 @@ public class InMemoryMethodRepo implements MethodRepository {
 
     @Override
     public Collection<Integer> allMethodsForOwner(int ownerId) {
-        return lookup.get(ownerId).values();
+        if (lookup.containsKey(ownerId)) {
+            return lookup.get(ownerId).values();
+        }
+
+        return Collections.emptyList();
     }
 }

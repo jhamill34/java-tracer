@@ -11,6 +11,7 @@ import tech.jhamill34.entities.InstructionEntity;
 import tech.jhamill34.entities.MethodEntity;
 import tech.jhamill34.tree.ClassRepository;
 import tech.jhamill34.tree.FieldRepository;
+import tech.jhamill34.tree.InstructionRepository;
 import tech.jhamill34.tree.MethodRepository;
 
 import java.util.Collection;
@@ -24,6 +25,9 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
 
     @Inject
     private FieldRepository fieldRepository;
+
+    @Inject
+    private InstructionRepository instructionRepository;
 
     @Override
     public String visitClassEntity(ClassEntity classEntity) {
@@ -114,6 +118,13 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
 
         sb.append("Access: ");
         appendAccess(methodEntity.getAccess(), sb);
+        sb.append('\n');
+
+        Collection<Integer> instructionIds = instructionRepository.allInstructionsForInvoker(methodEntity.getId());
+        sb.append("Instructions:").append('\n');
+        for (int instructionId : instructionIds) {
+            sb.append('\t').append(instructionId).append('\n');
+        }
 
         return sb.toString();
     }

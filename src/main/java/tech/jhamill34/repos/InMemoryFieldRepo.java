@@ -4,6 +4,7 @@ import tech.jhamill34.entities.FieldEntity;
 import tech.jhamill34.tree.FieldRepository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -52,6 +53,10 @@ public class InMemoryFieldRepo implements FieldRepository {
 
     @Override
     public Collection<Integer> allFieldsForOwner(int ownerId) {
-        return lookup.get(ownerId).values();
+        if (lookup.containsKey(ownerId)) {
+            return lookup.get(ownerId).values();
+        }
+
+        return Collections.emptyList();
     }
 }

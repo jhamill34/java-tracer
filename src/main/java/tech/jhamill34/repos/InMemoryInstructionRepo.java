@@ -5,6 +5,7 @@ import tech.jhamill34.entities.InstructionEntity;
 import tech.jhamill34.tree.InstructionRepository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -57,7 +58,11 @@ public class InMemoryInstructionRepo implements InstructionRepository {
 
     @Override
     public Collection<Integer> allInstructionsForInvoker(int invokerId) {
-        return lookup.get(invokerId).values();
+        if (lookup.containsKey(invokerId)) {
+            return lookup.get(invokerId).values();
+        }
+
+        return Collections.emptyList();
     }
 
     @Override
