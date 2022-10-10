@@ -13,9 +13,17 @@ public class InstructionEntity implements Entity {
     int opCode;
     int lineNumber;
     int index;
+    int referenceId;
+    ReferenceType referenceType;
 
     @Override
     public String accept(EntityVisitor entityVisitor) {
         return entityVisitor.visitInstructionEntity(this);
+    }
+
+
+    public enum ReferenceType {
+        METHOD,
+        FIELD
     }
 }

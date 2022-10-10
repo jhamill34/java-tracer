@@ -82,7 +82,51 @@ public class ASMTreeProcessor implements BytecodeTreeProcessor {
                     currentLineNumber = lineNumberNode.line;
                 }
 
-                int instructionId = instructionRepository.save(transformInstruction(insnNode, methodId, currentLineNumber, i));
+                int referenceId = -1;
+                InstructionEntity.ReferenceType referenceType = null;
+                if (insnNode instanceof MethodInsnNode) {
+                    referenceType = InstructionEntity.ReferenceType.METHOD;
+                    MethodInsnNode methodInsnNode = (MethodInsnNode) insnNode;
+
+                    int ownerId = classRepository.getId(methodInsnNode.owner);
+                    if (ownerId < 0) {
+                        ownerId = classRepository.save(ClassEntity.builder()
+                                .name(methodInsnNode.owner)
+                                .packageName("<unknown>")
+                                .build());
+                    }
+
+                    referenceId = methodRepository.getId(ownerId, methodInsnNode.name + methodInsnNode.desc);
+                    if (referenceId < 0) {
+                        referenceId = methodRepository.save(MethodEntity.builder()
+                                        .ownerId(ownerId)
+                                        .name(methodInsnNode.name)
+                                        .descriptor(methodInsnNode.desc)
+                                        .build());
+                    }
+                } else if (insnNode instanceof FieldInsnNode) {
+                    referenceType = InstructionEntity.ReferenceType.FIELD;
+                    FieldInsnNode fieldInsnNode = (FieldInsnNode) insnNode;
+
+                    int ownerId = classRepository.getId(fieldInsnNode.owner);
+                    if (ownerId < 0) {
+                        ownerId = classRepository.save(ClassEntity.builder()
+                                .name(fieldInsnNode.owner)
+                                .packageName("<unknown>")
+                                .build());
+                    }
+
+                    referenceId = fieldRepository.getId(ownerId, fieldInsnNode.name + fieldInsnNode.desc);
+                    if (referenceId < 0) {
+                        referenceId = fieldRepository.save(FieldEntity.builder()
+                                .ownerId(ownerId)
+                                .name(fieldInsnNode.name)
+                                .descriptor(fieldInsnNode.desc)
+                                .build());
+                    }
+                }
+
+                int instructionId = instructionRepository.save(transformInstruction(insnNode, methodId, currentLineNumber, i, referenceId, referenceType));
                 heapStore.saveInstruction(instructionId, insnNode);
             }
         }
@@ -117,12 +161,14 @@ public class ASMTreeProcessor implements BytecodeTreeProcessor {
                 .build();
     }
 
-    private InstructionEntity transformInstruction(AbstractInsnNode insnNode, int invokerId, int lineNumber, int index) {
+    private InstructionEntity transformInstruction(AbstractInsnNode insnNode, int invokerId, int lineNumber, int index, int referenceId, InstructionEntity.ReferenceType referenceType) {
         return InstructionEntity.builder()
                 .opCode(insnNode.getOpcode())
                 .invokerId(invokerId)
                 .index(index)
                 .lineNumber(lineNumber)
+                .referenceId(referenceId)
+                .referenceType(referenceType)
                 .build();
     }
 }

@@ -92,6 +92,14 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
 
         sb.append("Invoker ID: ").append(instructionEntity.getInvokerId()).append('\n');
 
+        if (instructionEntity.getReferenceId() >= 0) {
+            if (instructionEntity.getReferenceType() == InstructionEntity.ReferenceType.METHOD) {
+                sb.append("Called Method: ").append(instructionEntity.getReferenceId()).append('\n');
+            } else if (instructionEntity.getReferenceType() == InstructionEntity.ReferenceType.FIELD) {
+                sb.append("Referenced Field: ").append(instructionEntity.getReferenceId()).append('\n');
+            }
+        }
+
         return sb.toString();
     }
 
@@ -123,7 +131,8 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
         Collection<Integer> instructionIds = instructionRepository.allInstructionsForInvoker(methodEntity.getId());
         sb.append("Instructions:").append('\n');
         for (int instructionId : instructionIds) {
-            sb.append('\t').append(instructionId).append('\n');
+            InstructionEntity instructionEntity = instructionRepository.findById(instructionId);
+            sb.append('\t').append(instructionId).append(": ").append(convertOpcode(instructionEntity.getOpCode())).append('\n');
         }
 
         return sb.toString();
