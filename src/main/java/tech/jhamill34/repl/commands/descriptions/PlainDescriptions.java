@@ -3,6 +3,7 @@ package tech.jhamill34.repl.commands.descriptions;
 import com.google.inject.Inject;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import tech.jhamill34.analyze.HeapStore;
 import tech.jhamill34.analyze.IdValue;
 import tech.jhamill34.entities.ClassEntity;
 import tech.jhamill34.entities.EntityVisitor;
@@ -28,6 +29,9 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
 
     @Inject
     private InstructionRepository instructionRepository;
+
+    @Inject
+    private HeapStore heapStore;
 
     @Override
     public String visitClassEntity(ClassEntity classEntity) {
@@ -137,6 +141,15 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
         for (int instructionId : instructionIds) {
             InstructionEntity instructionEntity = instructionRepository.findById(instructionId);
             sb.append('\t').append(instructionId).append(": ").append(convertOpcode(instructionEntity.getOpCode())).append('\n');
+
+            Collection<Integer> produced = heapStore.findProducedByInstruction(instructionId);
+            if (produced != null && produced.size() > 0) {
+                sb.append("\t\tProduced: ").append(produced).append('\n');
+            }
+            Collection<Integer> consumed = heapStore.findConsumedByInstruction(instructionId);
+            if (consumed != null && consumed.size() > 0) {
+                sb.append("\t\tConsumed: ").append(consumed).append('\n');
+            }
         }
 
         return sb.toString();
