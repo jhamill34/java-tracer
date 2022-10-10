@@ -46,7 +46,11 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
         sb.append('\n');
 
         int superClassId = classRepository.getSuperClassId(classEntity.getId());
-        sb.append("SuperClass: ").append(superClassId).append('\n');
+        sb.append("SuperClass: ");
+        if (superClassId >= 0) {
+            sb.append(superClassId);
+        }
+        sb.append('\n');
 
         Collection<Integer> interfaceIds = classRepository.getInterfaceIds(classEntity.getId());
         sb.append("Implemented Interfaces: ").append('\n');

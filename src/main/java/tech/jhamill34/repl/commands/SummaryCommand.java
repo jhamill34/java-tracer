@@ -41,7 +41,11 @@ public class SummaryCommand implements Command {
         sb.append("Loaded Methods: ").append(methodIds.size()).append('\n');
         sb.append("Loaded Fields: ").append(fieldIds.size()).append('\n');
         sb.append("Loaded Instructions: ").append(instructionIds.size()).append('\n');
+
         sb.append("Variables: ").append(variableIds.size()).append('\n');
+        for (int variableId : variableIds) {
+            sb.append('\t').append(variableId).append('\n');
+        }
 
         return sb.toString();
     }

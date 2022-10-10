@@ -89,7 +89,13 @@ public class InMemoryClassRepo implements ClassRepository {
 
     @Override
     public int getSuperClassId(int id) {
-        return filterByType(id, relationships.successors(id), RelationshipType.EXTENDS, false).get(0);
+        List<Integer> superClasses = filterByType(id, relationships.successors(id), RelationshipType.EXTENDS, false);
+
+        if (superClasses != null && superClasses.size() > 0) {
+            return superClasses.get(0);
+        }
+
+        return -1;
     }
 
     @Override
