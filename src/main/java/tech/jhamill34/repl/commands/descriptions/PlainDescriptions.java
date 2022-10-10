@@ -1,5 +1,6 @@
 package tech.jhamill34.repl.commands.descriptions;
 
+import com.google.common.graph.Graph;
 import com.google.inject.Inject;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -135,6 +136,12 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
         sb.append("Access: ");
         appendAccess(methodEntity.getAccess(), sb);
         sb.append('\n');
+
+        Graph<Integer> controlFlow = instructionRepository.getControlFlowForInvoker(methodEntity.getId());
+        if (controlFlow != null) {
+            int complexity = controlFlow.edges().size() - controlFlow.nodes().size() + 2;
+            sb.append("Cyclomatic Complexity: ").append(complexity).append('\n');
+        }
 
         Collection<Integer> instructionIds = instructionRepository.allInstructionsForInvoker(methodEntity.getId());
         sb.append("Instructions:").append('\n');
