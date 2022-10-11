@@ -10,6 +10,7 @@ import tech.jhamill34.app.CLIHandler;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Set;
 
 @CommandLine.Command(
@@ -93,7 +94,7 @@ public class ClasspathHandler implements CLIHandler {
                 return;
             }
 
-            classpathAnalyzer.analyze(mainClass, startingMethod);
+            classpathAnalyzer.analyze(mainClass, startingMethod, Collections.emptyList());
 
             for (Report report : reports) {
                 report.report();

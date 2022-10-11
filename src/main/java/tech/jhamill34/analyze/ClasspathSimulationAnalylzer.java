@@ -14,6 +14,7 @@ import tech.jhamill34.tree.ClassRepository;
 import tech.jhamill34.tree.MethodRepository;
 
 import java.util.Collections;
+import java.util.List;
 
 public class ClasspathSimulationAnalylzer implements ClasspathAnalyzer {
     private static final Logger logger = LoggerFactory.getLogger(ClasspathSimulationAnalylzer.class);
@@ -34,7 +35,7 @@ public class ClasspathSimulationAnalylzer implements ClasspathAnalyzer {
     private HeapStore heapStore;
 
     @Override
-    public boolean analyze(String mainClass, String entryMethod) {
+    public boolean analyze(String mainClass, String entryMethod, List<? extends IdValue> args) {
         String key = mainClass + "." + entryMethod;
 
         int classId = classRepository.getId(mainClass);
@@ -46,7 +47,7 @@ public class ClasspathSimulationAnalylzer implements ClasspathAnalyzer {
             return false;
         }
 
-        Interpreter<IdValue> interpreter = interpreterFactory.createRecursiveInterpreter(Collections.emptyList(), new ValueContainer());
+        Interpreter<IdValue> interpreter = interpreterFactory.createRecursiveInterpreter(args, new ValueContainer());
         Analyzer<IdValue> analyzer = analyzerFactory.createAnalyzer(interpreter);
 
         try {
