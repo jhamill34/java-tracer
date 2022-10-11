@@ -2,12 +2,14 @@ package tech.jhamill34.resolvers;
 
 import com.google.common.graph.Graph;
 import com.google.inject.Inject;
+import org.objectweb.asm.Type;
 import tech.jhamill34.entities.ClassEntity;
 import tech.jhamill34.entities.InstructionEntity;
 import tech.jhamill34.entities.MethodEntity;
 import tech.jhamill34.tree.ClassRepository;
 import tech.jhamill34.tree.InstructionRepository;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,5 +42,14 @@ public class MethodResolver {
 
     public ClassEntity getOwner(MethodEntity parent) {
         return classRepository.findById(parent.getOwnerId());
+    }
+
+    public String getReturnType(MethodEntity methodEntity) {
+        return Type.getReturnType(methodEntity.getDescriptor()).getClassName();
+    }
+
+    public List<String> getParameters(MethodEntity methodEntity) {
+        return Arrays.stream(Type.getArgumentTypes(methodEntity.getDescriptor()))
+                .map(Type::getClassName).collect(Collectors.toList());
     }
 }
