@@ -16,7 +16,9 @@ import tech.jhamill34.tree.FieldRepository;
 import tech.jhamill34.tree.InstructionRepository;
 import tech.jhamill34.tree.MethodRepository;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class PlainDescriptions implements EntityVisitor, Opcodes {
     @Inject
@@ -139,8 +141,11 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
 
         Graph<Integer> controlFlow = instructionRepository.getControlFlowForInvoker(methodEntity.getId());
         if (controlFlow != null) {
-            int complexity = controlFlow.edges().size() - controlFlow.nodes().size() + 2;
-            sb.append("Cyclomatic Complexity: ").append(complexity).append('\n');
+            int edges = controlFlow.edges().size();
+            int nodes = controlFlow.nodes().size();
+            int complexity = edges - nodes + 2;
+
+            sb.append("Cyclomatic Complexity: ").append(complexity).append("(E=").append(edges).append(",N=").append(nodes).append(")").append('\n');
         }
 
         Collection<Integer> instructionIds = instructionRepository.allInstructionsForInvoker(methodEntity.getId());
@@ -192,17 +197,17 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
         sb.append("Size: ").append(value.delegate.getSize()).append('\n');
 
         Integer producer = heapStore.findInstructionProducingValue(value.getId());
-        sb.append("Producer: ");
+        sb.append("Producer: \n");
         if (producer < 0) {
             sb.append("<unknown>");
         } else {
-            sb.append(producer).append('\n');
+            printInstructionSource(sb, producer);
         }
 
         Collection<Integer> consumers = heapStore.findInstructionsConsumingValue(value.getId());
         sb.append("Consumers: ").append('\n');
         for (int consumer : consumers) {
-            sb.append('\t').append(consumer).append('\n');
+            printInstructionSource(sb, consumer);
         }
 
         Collection<Integer> proxies = heapStore.expandArrayValue(value.getId());
@@ -219,6 +224,26 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
         }
 
         return sb.toString();
+    }
+
+    private void printInstructionSource(StringBuilder sb, int instructionId) {
+        InstructionEntity instructionEntity = instructionRepository.findById(instructionId);
+        MethodEntity methodEntity = methodRepository.findById(instructionEntity.getInvokerId());
+        ClassEntity classEntity = classRepository.findById(methodEntity.getOwnerId());
+
+        sb.append('\t')
+                .append(instructionId)
+                .append('\t')
+                .append(Type.getReturnType(methodEntity.getDescriptor()).getClassName())
+                .append(' ')
+                .append(classEntity.getName())
+                .append('.')
+                .append(methodEntity.getName())
+                .append('(')
+                .append(Arrays.stream(Type.getArgumentTypes(methodEntity.getDescriptor())).map(Type::getClassName).collect(Collectors.joining(", ")))
+                .append("):")
+                .append(instructionEntity.getLineNumber())
+                .append('\n');
     }
 
     private static void appendAccess(final int accessFlags, StringBuilder stringBuilder) {
