@@ -2,15 +2,19 @@ package tech.jhamill34.repl.commands;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import tech.jhamill34.entities.Entity;
+import tech.jhamill34.entities.EntityVisitor;
+import tech.jhamill34.repl.commands.attributes.Query;
+import tech.jhamill34.repl.commands.attributes.QueryException;
 import tech.jhamill34.repl.executors.Command;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Locale;
 import java.util.Stack;
 
 public class GetAttributeCommand implements Command {
+    @Inject
+    private EntityVisitor<Query> queryVisitor;
+
     @Inject
     @Named("replstack")
     private Stack<Object> stack;
@@ -21,17 +25,24 @@ public class GetAttributeCommand implements Command {
             Object top = stack.pop();
             String attribute = operands.get(0);
 
-            String getter = "get" + attribute.substring(0, 1).toUpperCase(Locale.ROOT) + attribute.substring(1);
-
-            try {
-                Method method = top.getClass().getDeclaredMethod(getter);
-                Object result = method.invoke(top);
-                stack.push(result);
-                return "Success";
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                return "Attribute not found: " + attribute;
+            if (top instanceof Entity) {
+                Entity entity = (Entity) top;
+                try {
+                    stack.push(entity.accept(queryVisitor).query(attribute));
+                    return "Success";
+                } catch (QueryException e) {
+                    return e.getMessage();
+                }
+            } else if (top instanceof List) {
+                List<?> items = (List<?>) top;
+                try {
+                    int index = Integer.parseInt(attribute);
+                    stack.push(items.get(index));
+                    return "Success";
+                } catch (NumberFormatException e) {
+                    return "Indexing into an array requires an integer: " + attribute;
+                }
             }
-
         }
 
         return "Must provide attribute to find";

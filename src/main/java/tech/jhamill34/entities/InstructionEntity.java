@@ -17,7 +17,7 @@ public class InstructionEntity implements Entity {
     ReferenceType referenceType;
 
     @Override
-    public String accept(EntityVisitor<String> entityVisitor) {
+    public <T> T accept(EntityVisitor<T> entityVisitor) {
         return entityVisitor.visitInstructionEntity(this);
     }
 

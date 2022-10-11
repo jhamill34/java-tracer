@@ -15,7 +15,7 @@ public class ClassEntity implements Entity {
     String packageName;
 
     @Override
-    public String accept(EntityVisitor<String> entityVisitor) {
+    public <T> T accept(EntityVisitor<T> entityVisitor) {
         return entityVisitor.visitClassEntity(this);
     }
 }

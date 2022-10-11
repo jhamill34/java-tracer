@@ -12,6 +12,7 @@ import tech.jhamill34.repl.Executor;
 import tech.jhamill34.repl.SimpleREPLHandler;
 import tech.jhamill34.repl.commands.DescribeCommand;
 import tech.jhamill34.repl.commands.Duplicate;
+import tech.jhamill34.repl.commands.ExpandCommand;
 import tech.jhamill34.repl.commands.FindCommand;
 import tech.jhamill34.repl.commands.GetAttributeCommand;
 import tech.jhamill34.repl.commands.GetId;
@@ -24,6 +25,8 @@ import tech.jhamill34.repl.commands.ShowStack;
 import tech.jhamill34.repl.commands.StoreCommand;
 import tech.jhamill34.repl.commands.SummaryCommand;
 import tech.jhamill34.repl.commands.SwapCommand;
+import tech.jhamill34.repl.commands.attributes.Query;
+import tech.jhamill34.repl.commands.attributes.QueryVisitor;
 import tech.jhamill34.repl.commands.descriptions.PlainDescriptions;
 import tech.jhamill34.repl.executors.Command;
 import tech.jhamill34.repl.executors.ExecutorImpl;
@@ -38,6 +41,7 @@ public class REPLModule extends AbstractModule {
         bind(REPLHandler.class).to(SimpleREPLHandler.class).in(Singleton.class);
         bind(Executor.class).to(ExecutorImpl.class).in(Singleton.class);
         bind(new TypeLiteral<EntityVisitor<String>>(){}).to(PlainDescriptions.class);
+        bind(new TypeLiteral<EntityVisitor<Query>>(){}).to(QueryVisitor.class);
 
         MapBinder<String, Command> commandBinder = MapBinder.newMapBinder(binder(), String.class, Command.class);
         commandBinder.addBinding("stack").to(ShowStack.class).in(Singleton.class);
@@ -54,6 +58,7 @@ public class REPLModule extends AbstractModule {
         commandBinder.addBinding("load").to(LoadCommand.class).in(Singleton.class);
         commandBinder.addBinding("store").to(StoreCommand.class).in(Singleton.class);
         commandBinder.addBinding("attr").to(GetAttributeCommand.class).in(Singleton.class);
+        commandBinder.addBinding("expand").to(ExpandCommand.class).in(Singleton.class);
     }
 
     @Provides

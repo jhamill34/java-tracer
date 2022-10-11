@@ -28,13 +28,7 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
     private MethodRepository methodRepository;
 
     @Inject
-    private FieldRepository fieldRepository;
-
-    @Inject
     private InstructionRepository instructionRepository;
-
-    @Inject
-    private HeapStore heapStore;
 
     @Override
     public String visitClassEntity(ClassEntity classEntity) {
@@ -52,43 +46,6 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
         appendAccess(classEntity.getAccess(), sb);
         sb.append('\n');
 
-        int superClassId = classRepository.getSuperClassId(classEntity.getId());
-        sb.append("SuperClass: ");
-        if (superClassId >= 0) {
-            sb.append(superClassId);
-        }
-        sb.append('\n');
-
-        Collection<Integer> interfaceIds = classRepository.getInterfaceIds(classEntity.getId());
-        sb.append("Implemented Interfaces: ").append('\n');
-        for (int interfaceId : interfaceIds) {
-            sb.append('\t').append(interfaceId).append('\n');
-        }
-
-        Collection<Integer> subClasses = classRepository.getSubclassIds(classEntity.getId());
-        sb.append("SubClasses: ").append('\n');
-        for (int subClassId : subClasses) {
-            sb.append('\t').append(subClassId).append('\n');
-        }
-
-        Collection<Integer> implementorIds = classRepository.getImplementorIds(classEntity.getId());
-        sb.append("Implementors: ").append('\n');
-        for (int implementorId : implementorIds) {
-            sb.append('\t').append(implementorId).append('\n');
-        }
-
-        sb.append("Fields: ").append('\n');
-        Collection<Integer> fieldIds = fieldRepository.allFieldsForOwner(classEntity.getId());
-        for (int fieldId : fieldIds) {
-            sb.append('\t').append(fieldId).append('\n');
-        }
-
-        sb.append("Methods: ").append('\n');
-        Collection<Integer> methodIds = methodRepository.allMethodsForOwner(classEntity.getId());
-        for (int methodId : methodIds) {
-            sb.append('\t').append(methodId).append('\n');
-        }
-
         return sb.toString();
     }
 
@@ -101,16 +58,6 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
         sb.append("Line#: ").append(instructionEntity.getLineNumber()).append('\n');
         sb.append("Index: ").append(instructionEntity.getIndex()).append('\n');
 
-        sb.append("Invoker ID: ").append(instructionEntity.getInvokerId()).append('\n');
-
-        if (instructionEntity.getReferenceId() >= 0) {
-            if (instructionEntity.getReferenceType() == InstructionEntity.ReferenceType.METHOD) {
-                sb.append("Called Method: ").append(instructionEntity.getReferenceId()).append('\n');
-            } else if (instructionEntity.getReferenceType() == InstructionEntity.ReferenceType.FIELD) {
-                sb.append("Referenced Field: ").append(instructionEntity.getReferenceId()).append('\n');
-            }
-        }
-
         return sb.toString();
     }
 
@@ -119,7 +66,6 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
         StringBuilder sb = new StringBuilder();
 
         sb.append("ID: ").append(methodEntity.getId()).append('\n');
-        sb.append("Owner ID: ").append(methodEntity.getOwnerId()).append('\n');
         sb.append("Name: ").append(methodEntity.getName()).append('\n');
 
         Type[] arguments = Type.getArgumentTypes(methodEntity.getDescriptor());
@@ -139,31 +85,6 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
         appendAccess(methodEntity.getAccess(), sb);
         sb.append('\n');
 
-        Graph<Integer> controlFlow = instructionRepository.getControlFlowForInvoker(methodEntity.getId());
-        if (controlFlow != null) {
-            int edges = controlFlow.edges().size();
-            int nodes = controlFlow.nodes().size();
-            int complexity = edges - nodes + 2;
-
-            sb.append("Cyclomatic Complexity: ").append(complexity).append("(E=").append(edges).append(",N=").append(nodes).append(")").append('\n');
-        }
-
-        Collection<Integer> instructionIds = instructionRepository.allInstructionsForInvoker(methodEntity.getId());
-        sb.append("Instructions:").append('\n');
-        for (int instructionId : instructionIds) {
-            InstructionEntity instructionEntity = instructionRepository.findById(instructionId);
-            sb.append('\t').append(instructionId).append(": ").append(convertOpcode(instructionEntity.getOpCode())).append('\n');
-
-            Collection<Integer> produced = heapStore.findProducedByInstruction(instructionId);
-            if (produced != null && produced.size() > 0) {
-                sb.append("\t\tProduced: ").append(produced).append('\n');
-            }
-            Collection<Integer> consumed = heapStore.findConsumedByInstruction(instructionId);
-            if (consumed != null && consumed.size() > 0) {
-                sb.append("\t\tConsumed: ").append(consumed).append('\n');
-            }
-        }
-
         return sb.toString();
     }
 
@@ -172,7 +93,6 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
         StringBuilder sb = new StringBuilder();
 
         sb.append("ID: ").append(fieldEntity.getId()).append('\n');
-        sb.append("Owner ID: ").append(fieldEntity.getOwnerId()).append('\n');
         sb.append("Name: ").append(fieldEntity.getName()).append('\n');
 
         Type fieldType = Type.getType(fieldEntity.getDescriptor());
@@ -196,30 +116,6 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
         sb.append("Type: ").append(value.delegate.getType().getClassName()).append('\n');
         sb.append("Size: ").append(value.delegate.getSize()).append('\n');
 
-        Collection<Integer> producers = heapStore.findInstructionProducingValue(value.getId());
-        sb.append("Producer: \n");
-        for (int producer : producers) {
-            printInstructionSource(sb, producer);
-        }
-
-        Collection<Integer> consumers = heapStore.findInstructionsConsumingValue(value.getId());
-        sb.append("Consumers: \n");
-        for (int consumer : consumers) {
-            printInstructionSource(sb, consumer);
-        }
-
-        Collection<Integer> proxies = heapStore.expandArrayValue(value.getId());
-        if (!proxies.isEmpty()) {
-            sb.append("Proxy Value: \n");
-            for (int proxy : proxies) {
-               sb.append('\t').append(proxy).append('\n');
-            }
-        }
-
-        Integer proxiedBy = heapStore.findProxyValue(value.getId());
-        if (proxiedBy >= 0) {
-            sb.append("Proxied By: ").append(proxiedBy).append('\n');
-        }
 
         return sb.toString();
     }

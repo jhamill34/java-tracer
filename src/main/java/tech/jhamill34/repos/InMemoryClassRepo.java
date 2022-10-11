@@ -36,6 +36,15 @@ public class InMemoryClassRepo implements ClassRepository {
     public void recordInterfaces(int id, Collection<String> interfaces) {
         for (String interfaceName : interfaces) {
             int interfaceId = getOrGenerateId(interfaceName);
+
+            if (!data.containsKey(interfaceId)) {
+                data.put(interfaceId, ClassEntity.builder()
+                        .id(interfaceId)
+                        .name(interfaceName)
+                        .packageName("<unknown>")
+                        .build());
+            }
+
             link(id, interfaceId, RelationshipType.IMPLEMENTS);
         }
     }
