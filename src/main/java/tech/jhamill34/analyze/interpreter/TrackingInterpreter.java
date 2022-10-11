@@ -8,6 +8,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Interpreter;
+import tech.jhamill34.analyze.ArrayHandler;
 import tech.jhamill34.analyze.MethodHandler;
 import tech.jhamill34.analyze.ValueContainer;
 import tech.jhamill34.analyze.FieldHandler;
@@ -25,6 +26,8 @@ public class TrackingInterpreter extends DelegatingInterpreter {
     private final FieldHandler fieldHandler;
     private final MethodHandler methodHandler;
 
+    private final ArrayHandler arrayHandler;
+
     @Builder(builderMethodName = "recursiveBuilder")
     public TrackingInterpreter(
             Interpreter<BasicValue> delegate,
@@ -32,7 +35,8 @@ public class TrackingInterpreter extends DelegatingInterpreter {
             ValueContainer returnValue,
             HeapStore heapStore,
             FieldHandler fieldHandler,
-            MethodHandler methodHandler
+            MethodHandler methodHandler,
+            ArrayHandler arrayHandler
     ) {
         super(delegate);
         this.parameters = parameters;
@@ -40,6 +44,7 @@ public class TrackingInterpreter extends DelegatingInterpreter {
         this.heapStore = heapStore;
         this.fieldHandler = fieldHandler;
         this.methodHandler = methodHandler;
+        this.arrayHandler = arrayHandler;
     }
 
     @Override
@@ -81,6 +86,9 @@ public class TrackingInterpreter extends DelegatingInterpreter {
                     result = fieldHandler.handleGetField(fieldInsnNode, value, result);
 
             }
+        } else if (insn.getOpcode() == ANEWARRAY || insn.getOpcode() == NEWARRAY) {
+            // ANEWARRAY, NEWARRAY
+            arrayHandler.alloc(result);
         }
 
         heapStore.record(insn, result, Collections.singletonList(value));
@@ -96,6 +104,9 @@ public class TrackingInterpreter extends DelegatingInterpreter {
             if (fieldInsnNode.getOpcode() == PUTFIELD) {
                 fieldHandler.handlePutField(fieldInsnNode, value1, value2);
             }
+        } else if (insn.getOpcode() >= IALOAD && insn.getOpcode() <= SALOAD) {
+            // *ALOAD
+            result = arrayHandler.load(value1, result);
         }
 
         List<IdValue> args = Arrays.asList(value1, value2);
@@ -107,6 +118,11 @@ public class TrackingInterpreter extends DelegatingInterpreter {
     public IdValue ternaryOperation(AbstractInsnNode insn, IdValue value1, IdValue value2, IdValue value3) throws AnalyzerException {
         IdValue result = super.ternaryOperation(insn, value1, value2, value3);
 
+        // *ASTORE
+        if (insn.getOpcode() >= IASTORE && insn.getOpcode() <= SASTORE) {
+            arrayHandler.store(value1, value3);
+        }
+
         List<IdValue> args = Arrays.asList(value1, value2, value3);
         heapStore.record(insn, result, args);
         return result;
@@ -115,6 +131,8 @@ public class TrackingInterpreter extends DelegatingInterpreter {
     @Override
     public IdValue naryOperation(AbstractInsnNode insn, List<? extends IdValue> values) throws AnalyzerException {
         IdValue result = super.naryOperation(insn, values);
+
+        // MULTIANEWARRAY
 
         if (insn instanceof MethodInsnNode) {
             MethodInsnNode methodInsnNode = (MethodInsnNode) insn;

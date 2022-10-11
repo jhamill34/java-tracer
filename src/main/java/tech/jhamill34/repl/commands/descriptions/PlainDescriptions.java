@@ -205,6 +205,19 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
             sb.append('\t').append(consumer).append('\n');
         }
 
+        Collection<Integer> proxies = heapStore.expandArrayValue(value.getId());
+        if (!proxies.isEmpty()) {
+            sb.append("Proxy Value: \n");
+            for (int proxy : proxies) {
+               sb.append('\t').append(proxy).append('\n');
+            }
+        }
+
+        Integer proxiedBy = heapStore.findProxyValue(value.getId());
+        if (proxiedBy >= 0) {
+            sb.append("Proxied By: ").append(proxiedBy).append('\n');
+        }
+
         return sb.toString();
     }
 

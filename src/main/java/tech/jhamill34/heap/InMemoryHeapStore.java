@@ -11,9 +11,12 @@ import tech.jhamill34.analyze.IdValue;
 import tech.jhamill34.analyze.HeapStore;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -22,6 +25,10 @@ public class InMemoryHeapStore implements HeapStore {
 
     private final Map<IdValue, Map<String, Stack<IdValue>>> values = new HashMap<>();
     private final Map<String, Map<String, Stack<IdValue>>> staticValues = new HashMap<>();
+
+    private final Map<IdValue, IdValue> arrayProxy = new HashMap<>();
+    private final Map<Integer, Set<Integer>> possibleArrayValues = new HashMap<>();
+    private final Map<Integer, Integer> proxiedBy = new HashMap<>();
 
     private final Map<Integer, IdValue> data = new HashMap<>();
     private final Map<Integer, Integer> producedBy = new HashMap<>();
@@ -142,5 +149,39 @@ public class InMemoryHeapStore implements HeapStore {
     @Override
     public Collection<Integer> allValues() {
         return data.keySet();
+    }
+
+    @Override
+    public void createArray(IdValue ref, IdValue proxyValue) {
+        if (!arrayProxy.containsKey(ref)) {
+            arrayProxy.put(ref, proxyValue);
+            possibleArrayValues.put(proxyValue.id, new HashSet<>());
+        }
+    }
+
+    @Override
+    public void storeArray(IdValue ref, IdValue value) {
+        IdValue proxyValue = arrayProxy.get(ref);
+        possibleArrayValues.get(proxyValue.id).add(value.id);
+        proxiedBy.put(value.id, proxyValue.id);
+    }
+
+    @Override
+    public IdValue loadArray(IdValue ref) {
+        return arrayProxy.get(ref);
+    }
+
+    @Override
+    public Collection<Integer> expandArrayValue(int proxyValueId) {
+        if (possibleArrayValues.containsKey(proxyValueId)) {
+            return possibleArrayValues.get(proxyValueId);
+        }
+
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Integer findProxyValue(int valueId) {
+        return proxiedBy.getOrDefault(valueId, -1);
     }
 }

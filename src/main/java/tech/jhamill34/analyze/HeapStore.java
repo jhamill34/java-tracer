@@ -32,4 +32,10 @@ public interface HeapStore {
     Integer findInstructionProducingValue(int value);
 
     Collection<Integer> allValues();
+
+    void createArray(IdValue ref, IdValue proxyValue);
+    void storeArray(IdValue ref, IdValue value);
+    IdValue loadArray(IdValue ref);
+    Collection<Integer> expandArrayValue(int proxyValueId);
+    Integer findProxyValue(int valueId);
 }

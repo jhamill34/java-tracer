@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import org.objectweb.asm.tree.analysis.BasicInterpreter;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Interpreter;
+import tech.jhamill34.analyze.ArrayHandler;
 import tech.jhamill34.analyze.MethodHandler;
 import tech.jhamill34.analyze.ValueContainer;
 import tech.jhamill34.analyze.FieldHandler;
@@ -26,6 +27,9 @@ public class InterpreterFactoryImpl implements InterpreterFactory {
     @Inject
     private MethodHandler methodHandler;
 
+    @Inject
+    private ArrayHandler arrayHandler;
+
     @Override
     public Interpreter<IdValue> createRecursiveInterpreter(List<? extends IdValue> parameters, ValueContainer returnValue) {
         return TrackingInterpreter.recursiveBuilder()
@@ -35,6 +39,7 @@ public class InterpreterFactoryImpl implements InterpreterFactory {
                 .returnValue(returnValue)
                 .fieldHandler(fieldHandler)
                 .methodHandler(methodHandler)
+                .arrayHandler(arrayHandler)
                 .build();
     }
 
