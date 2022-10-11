@@ -1,6 +1,7 @@
 package tech.jhamill34.repl.commands;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import tech.jhamill34.entities.Entity;
 import tech.jhamill34.entities.EntityVisitor;
 import tech.jhamill34.repl.executors.Command;
@@ -12,8 +13,12 @@ public class DescribeCommand implements Command {
     @Inject
     private EntityVisitor entityVisitor;
 
+    @Inject
+    @Named("replstack")
+    private Stack<Object> stack;
+
     @Override
-    public String execute(Stack<Object> stack, List<String> operands) {
+    public String execute(List<String> operands) {
         Object top = stack.pop();
 
         if (top instanceof Entity) {

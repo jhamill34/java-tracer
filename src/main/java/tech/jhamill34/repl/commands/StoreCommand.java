@@ -5,27 +5,27 @@ import com.google.inject.name.Named;
 import tech.jhamill34.repl.executors.Command;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
-public class PopCommand implements Command {
-
+public class StoreCommand implements Command {
     @Inject
     @Named("replstack")
     private Stack<Object> stack;
 
+    @Inject
+    @Named("replvars")
+    private Map<String, Object> locals;
+
     @Override
     public String execute(List<String> operands) {
-        int count = 1;
         if (operands.size() > 0) {
-            try {
-                count = Integer.parseInt(operands.get(0));
-            } catch (NumberFormatException ignored) {}
+            Object top = stack.pop();
+
+            locals.put(operands.get(0), top);
+            return "Success";
         }
 
-        for (int i = 0; i < count; i++) {
-            stack.pop();
-        }
-
-        return "Removed " + count + " items";
+        return "Must provide a key map value to";
     }
 }

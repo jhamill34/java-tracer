@@ -5,17 +5,19 @@ import com.google.inject.name.Named;
 import tech.jhamill34.repl.executors.Command;
 
 import java.util.List;
-import java.util.Stack;
+import java.util.Map;
 
-public class ShowStack implements Command {
+public class ShowLocals implements Command {
     @Inject
-    @Named("replstack")
-    private Stack<Object> stack;
+    @Named("replvars")
+    private Map<String, Object> locals;
 
     @Override
     public String execute(List<String> operands) {
         StringBuilder sb = new StringBuilder();
-        stack.forEach(item -> sb.append(item).append('\n'));
+
+        locals.forEach((key, value) -> sb.append(key).append(": ").append(value).append('\n'));
+
         return sb.toString();
     }
 }

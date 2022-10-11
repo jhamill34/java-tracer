@@ -1,6 +1,7 @@
 package tech.jhamill34.repl.commands;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import tech.jhamill34.analyze.IdValue;
 import tech.jhamill34.entities.ClassEntity;
 import tech.jhamill34.entities.MethodEntity;
@@ -17,8 +18,12 @@ public class InvokeCommand implements Command {
     @Inject
     private ClasspathAnalyzer classpathAnalyzer;
 
+    @Inject
+    @Named("replstack")
+    private Stack<Object> stack;
+
     @Override
-    public String execute(Stack<Object> stack, List<String> operands) {
+    public String execute(List<String> operands) {
         List<IdValue> args = new LinkedList<>();
         if (operands.size() > 0) {
             try {

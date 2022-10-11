@@ -27,6 +27,7 @@ public class InMemoryClassRepo implements ClassRepository {
 
         ClassEntity classEntityWithId = classNode.withId(classId);
         data.put(classEntityWithId.getId(), classEntityWithId);
+        relationships.addNode(classEntityWithId.getId());
 
         return classEntityWithId.getId();
     }
@@ -67,7 +68,6 @@ public class InMemoryClassRepo implements ClassRepository {
     }
 
     private void link(int from, int to, RelationshipType type) {
-        relationships.addNode(from);
         relationships.addNode(to);
         relationships.putEdgeValue(from, to, type);
     }

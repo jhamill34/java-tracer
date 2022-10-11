@@ -1,6 +1,7 @@
 package tech.jhamill34.repl.commands;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.jhamill34.analyze.IdValue;
@@ -30,21 +31,28 @@ public class GetId implements Command {
     @Inject
     private InstructionRepository instructionRepository;
 
+    @Inject
+    @Named("replstack")
+    private Stack<Object> stack;
+
     @Override
-    public String execute(Stack<Object> stack, List<String> operands) {
+    public String execute(List<String> operands) {
+        if (operands.size() == 0) {
+            return "Must provide entity type";
+        }
+
         Object top = stack.pop();
+        char type = operands.get(0).charAt(0);
 
         if (top instanceof String) {
-            String searchString = (String) top;
-            char type = searchString.charAt(0);
-            String identifier = searchString.substring(1);
+            String identifier = (String) top;
 
             if (type == 'C') {
                 int id = classRepository.getId(identifier);
                 if (id < 0) {
                     return "Not found: " + identifier;
                 } else {
-                    stack.push("C" + id);
+                    stack.push(id);
                 }
             } else if (type == 'M') {
                 Object next = stack.pop();
@@ -54,7 +62,7 @@ public class GetId implements Command {
                     if (id < 0) {
                         return "Not found: " + classEntity.getId() + " method identifier " + identifier;
                     } else {
-                        stack.push("M" + id);
+                        stack.push(id);
                     }
                 } else {
                     return "Invalid stack state, expected class entity after method id: " + next;
@@ -69,7 +77,7 @@ public class GetId implements Command {
                         if (id < 0) {
                            return "Not found: " + methodEntity.getName() + " instruction at index " + index;
                         } else {
-                            stack.push("I" + id);
+                            stack.push(id);
                         }
                     } catch (NumberFormatException e) {
                         return "Invalid stack state, expected index to be a number: " + identifier;
@@ -84,35 +92,7 @@ public class GetId implements Command {
             return "Success";
         } else if (top instanceof Entity) {
             Entity entity = (Entity) top;
-
-            String type = entity.accept(new EntityVisitor() {
-                @Override
-                public String visitClassEntity(ClassEntity classEntity) {
-                    return "C";
-                }
-
-                @Override
-                public String visitInstructionEntity(InstructionEntity instructionEntity) {
-                    return "I";
-                }
-
-                @Override
-                public String visitMethodEntity(MethodEntity methodEntity) {
-                    return "M";
-                }
-
-                @Override
-                public String visitFieldEntity(FieldEntity fieldEntity) {
-                    return "F";
-                }
-
-                @Override
-                public String visitValue(IdValue value) {
-                    return "V";
-                }
-            });
-
-            stack.push(type + entity.getId());
+            stack.push(entity.getId());
             return "Success";
         }
 

@@ -1,6 +1,7 @@
 package tech.jhamill34.repl.commands;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import tech.jhamill34.analyze.HeapStore;
 import tech.jhamill34.repl.executors.Command;
 import tech.jhamill34.tree.ClassRepository;
@@ -28,8 +29,12 @@ public class SummaryCommand implements Command {
     @Inject
     private HeapStore heapStore;
 
+    @Inject
+    @Named("replstack")
+    private Stack<Object> stack;
+
     @Override
-    public String execute(Stack<Object> stack, List<String> operands) {
+    public String execute(List<String> operands) {
         StringBuilder sb = new StringBuilder();
         Collection<Integer> classIds = classRepository.allClasses();
         Collection<Integer> methodIds = methodRepository.allMethods();

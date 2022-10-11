@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import tech.jhamill34.repl.Executor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -13,8 +14,6 @@ public class ExecutorImpl implements Executor {
 
     @Inject
     private Map<String, Command> commands;
-
-    private final Stack<Object> stack = new Stack<>();
 
     @Override
     public String execute(String input) {
@@ -27,7 +26,7 @@ public class ExecutorImpl implements Executor {
         }
 
         if (commands.containsKey(cmd)) {
-            return commands.get(cmd).execute(stack, operands);
+            return commands.get(cmd).execute(operands);
         }
 
         return "Unknown command: " + input;
