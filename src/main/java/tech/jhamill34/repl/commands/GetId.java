@@ -37,13 +37,14 @@ public class GetId implements Command {
 
     @Override
     public String execute(List<String> operands) {
+        char type;
         if (operands.size() == 0) {
-            return "Must provide entity type";
+            type = stack.pop().toString().charAt(0);
+        } else {
+            type = operands.get(0).charAt(0);
         }
 
         Object top = stack.pop();
-        char type = operands.get(0).charAt(0);
-
         if (top instanceof String) {
             String identifier = (String) top;
 

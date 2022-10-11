@@ -21,30 +21,33 @@ public class GetAttributeCommand implements Command {
 
     @Override
     public String execute(List<String> operands) {
+        String attribute;
         if (operands.size() > 0) {
-            Object top = stack.pop();
-            String attribute = operands.get(0);
+            attribute = operands.get(0);
+        } else {
+            attribute = stack.pop().toString();
+        }
 
-            if (top instanceof Entity) {
-                Entity entity = (Entity) top;
-                try {
-                    stack.push(entity.accept(queryVisitor).query(attribute));
-                    return "Success";
-                } catch (QueryException e) {
-                    return e.getMessage();
-                }
-            } else if (top instanceof List) {
-                List<?> items = (List<?>) top;
-                try {
-                    int index = Integer.parseInt(attribute);
-                    stack.push(items.get(index));
-                    return "Success";
-                } catch (NumberFormatException e) {
-                    return "Indexing into an array requires an integer: " + attribute;
-                }
+        Object top = stack.pop();
+        if (top instanceof Entity) {
+            Entity entity = (Entity) top;
+            try {
+                stack.push(entity.accept(queryVisitor).query(attribute));
+                return "Success";
+            } catch (QueryException e) {
+                return e.getMessage();
+            }
+        } else if (top instanceof List) {
+            List<?> items = (List<?>) top;
+            try {
+                int index = Integer.parseInt(attribute);
+                stack.push(items.get(index));
+                return "Success";
+            } catch (NumberFormatException e) {
+                return "Indexing into an array requires an integer: " + attribute;
             }
         }
 
-        return "Must provide attribute to find";
+        return "Invalid stack state, can only get attributes on a list or entity: " + top;
     }
 }
