@@ -3,6 +3,7 @@ package tech.jhamill34.modules;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Named;
 import tech.jhamill34.entities.EntityVisitor;
@@ -36,7 +37,7 @@ public class REPLModule extends AbstractModule {
     protected void configure() {
         bind(REPLHandler.class).to(SimpleREPLHandler.class).in(Singleton.class);
         bind(Executor.class).to(ExecutorImpl.class).in(Singleton.class);
-        bind(EntityVisitor.class).to(PlainDescriptions.class);
+        bind(new TypeLiteral<EntityVisitor<String>>(){}).to(PlainDescriptions.class);
 
         MapBinder<String, Command> commandBinder = MapBinder.newMapBinder(binder(), String.class, Command.class);
         commandBinder.addBinding("stack").to(ShowStack.class).in(Singleton.class);

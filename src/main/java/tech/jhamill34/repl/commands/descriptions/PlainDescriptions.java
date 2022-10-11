@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class PlainDescriptions implements EntityVisitor, Opcodes {
+public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
     @Inject
     private ClassRepository classRepository;
 

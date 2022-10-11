@@ -16,7 +16,7 @@ public class FieldEntity implements Entity {
     String signature;
 
     @Override
-    public String accept(EntityVisitor entityVisitor) {
+    public String accept(EntityVisitor<String> entityVisitor) {
         return entityVisitor.visitFieldEntity(this);
     }
 }

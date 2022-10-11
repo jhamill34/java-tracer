@@ -16,7 +16,7 @@ public class MethodEntity implements Entity {
     String signature;
 
     @Override
-    public String accept(EntityVisitor entityVisitor) {
+    public String accept(EntityVisitor<String> entityVisitor) {
         return entityVisitor.visitMethodEntity(this);
     }
 }

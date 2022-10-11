@@ -59,7 +59,7 @@ public class IdValue implements Value, Entity {
     }
 
     @Override
-    public String accept(EntityVisitor entityVisitor) {
+    public String accept(EntityVisitor<String> entityVisitor) {
         return entityVisitor.visitValue(this);
     }
 }

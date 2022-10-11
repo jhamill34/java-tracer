@@ -11,7 +11,7 @@ import java.util.Stack;
 
 public class DescribeCommand implements Command {
     @Inject
-    private EntityVisitor entityVisitor;
+    private EntityVisitor<String> entityVisitor;
 
     @Inject
     @Named("replstack")

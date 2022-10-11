@@ -2,10 +2,10 @@ package tech.jhamill34.entities;
 
 import tech.jhamill34.analyze.IdValue;
 
-public interface EntityVisitor {
-    String visitClassEntity(ClassEntity classEntity);
-    String visitInstructionEntity(InstructionEntity instructionEntity);
-    String visitMethodEntity(MethodEntity methodEntity);
-    String visitFieldEntity(FieldEntity fieldEntity);
-    String visitValue(IdValue value);
+public interface EntityVisitor<T> {
+    T visitClassEntity(ClassEntity classEntity);
+    T visitInstructionEntity(InstructionEntity instructionEntity);
+    T visitMethodEntity(MethodEntity methodEntity);
+    T visitFieldEntity(FieldEntity fieldEntity);
+    T visitValue(IdValue value);
 }
