@@ -31,7 +31,7 @@ public class InMemoryHeapStore implements HeapStore {
     private final Map<Integer, Integer> proxiedBy = new HashMap<>();
 
     private final Map<Integer, IdValue> data = new HashMap<>();
-    private final Map<Integer, Integer> producedBy = new HashMap<>();
+    private final Multimap<Integer, Integer> producedBy = MultimapBuilder.hashKeys().hashSetValues().build();
     private final Multimap<Integer, Integer> produces = MultimapBuilder.hashKeys().hashSetValues().build();
     private final Multimap<Integer, Integer> consumedBy = MultimapBuilder.hashKeys().hashSetValues().build();
     private final Multimap<Integer, Integer> consuming = MultimapBuilder.hashKeys().hashSetValues().build();
@@ -102,8 +102,8 @@ public class InMemoryHeapStore implements HeapStore {
     }
 
     @Override
-    public Integer findInstructionProducingValue(int value) {
-        return producedBy.getOrDefault(value, -1);
+    public Collection<Integer> findInstructionProducingValue(int value) {
+        return producedBy.get(value);
     }
 
     @Override

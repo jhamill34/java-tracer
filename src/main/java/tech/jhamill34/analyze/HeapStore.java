@@ -29,7 +29,7 @@ public interface HeapStore {
     Collection<Integer> findConsumedByInstruction(int insnNode);
     Collection<Integer> findProducedByInstruction(int insnNode);
     Collection<Integer> findInstructionsConsumingValue(int value);
-    Integer findInstructionProducingValue(int value);
+    Collection<Integer> findInstructionProducingValue(int value);
 
     Collection<Integer> allValues();
 

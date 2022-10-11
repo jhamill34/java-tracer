@@ -196,16 +196,14 @@ public class PlainDescriptions implements EntityVisitor, Opcodes {
         sb.append("Type: ").append(value.delegate.getType().getClassName()).append('\n');
         sb.append("Size: ").append(value.delegate.getSize()).append('\n');
 
-        Integer producer = heapStore.findInstructionProducingValue(value.getId());
+        Collection<Integer> producers = heapStore.findInstructionProducingValue(value.getId());
         sb.append("Producer: \n");
-        if (producer < 0) {
-            sb.append("<unknown>");
-        } else {
+        for (int producer : producers) {
             printInstructionSource(sb, producer);
         }
 
         Collection<Integer> consumers = heapStore.findInstructionsConsumingValue(value.getId());
-        sb.append("Consumers: ").append('\n');
+        sb.append("Consumers: \n");
         for (int consumer : consumers) {
             printInstructionSource(sb, consumer);
         }
