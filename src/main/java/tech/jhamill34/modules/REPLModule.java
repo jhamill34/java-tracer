@@ -9,6 +9,7 @@ import com.google.inject.name.Named;
 import tech.jhamill34.entities.EntityVisitor;
 import tech.jhamill34.pico.REPLHandler;
 import tech.jhamill34.pico.ScriptHandler;
+import tech.jhamill34.repl.Compiler;
 import tech.jhamill34.repl.Executor;
 import tech.jhamill34.repl.SimpleREPLHandler;
 import tech.jhamill34.repl.SimpleScriptHandler;
@@ -35,6 +36,7 @@ import tech.jhamill34.repl.commands.attributes.QueryVisitor;
 import tech.jhamill34.repl.commands.descriptions.PlainDescriptions;
 import tech.jhamill34.repl.executors.Command;
 import tech.jhamill34.repl.executors.ExecutorImpl;
+import tech.jhamill34.repl.extensions.CompilerImpl;
 import tech.jhamill34.repl.state.StateManagerImpl;
 
 import java.util.HashMap;
@@ -47,6 +49,8 @@ public class REPLModule extends AbstractModule {
         bind(ScriptHandler.class).to(SimpleScriptHandler.class).in(Singleton.class);
         bind(REPLHandler.class).to(SimpleREPLHandler.class).in(Singleton.class);
         bind(Executor.class).to(ExecutorImpl.class).in(Singleton.class);
+        bind(Compiler.class).to(CompilerImpl.class).in(Singleton.class);
+
         bind(new TypeLiteral<EntityVisitor<String>>(){}).to(PlainDescriptions.class);
         bind(new TypeLiteral<EntityVisitor<Query>>(){}).to(QueryVisitor.class);
         bind(StateManager.class).to(StateManagerImpl.class).in(Singleton.class);

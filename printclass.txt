@@ -14,10 +14,6 @@ getMethod:
     find
     return
 
-simulate:
-    invoke
-    return
-
 test:
     call getClass 1
     dup
@@ -28,13 +24,11 @@ test:
     load mainClass
     swap
 
-    call simulate 2
+    invoke
     return
 
 main:
-    push hello
-    push main([Ljava/lang/String;)V
-    push tech/jhamill34/app/Application
+    push hello main([Ljava/lang/String;)V tech/jhamill34/app/Application
     call test 2
     print
 

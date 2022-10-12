@@ -25,9 +25,12 @@ public class SimpleScriptHandler implements ScriptHandler {
     @Inject
     private StateManager stateManager;
 
+    @Inject
+    private Compiler compiler;
+
     @Override
     public void start(String source) {
-        String[] commands = source.split(System.lineSeparator());
+        String[] commands = compiler.compile(source);
         int ip = 0;
 
         Map<String, Integer> labelIndex = new HashMap<>();
