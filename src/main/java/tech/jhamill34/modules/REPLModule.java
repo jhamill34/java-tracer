@@ -12,6 +12,7 @@ import tech.jhamill34.pico.ScriptHandler;
 import tech.jhamill34.repl.Executor;
 import tech.jhamill34.repl.SimpleREPLHandler;
 import tech.jhamill34.repl.SimpleScriptHandler;
+import tech.jhamill34.repl.StateManager;
 import tech.jhamill34.repl.commands.CompareCommand;
 import tech.jhamill34.repl.commands.DescribeCommand;
 import tech.jhamill34.repl.commands.Duplicate;
@@ -34,6 +35,7 @@ import tech.jhamill34.repl.commands.attributes.QueryVisitor;
 import tech.jhamill34.repl.commands.descriptions.PlainDescriptions;
 import tech.jhamill34.repl.executors.Command;
 import tech.jhamill34.repl.executors.ExecutorImpl;
+import tech.jhamill34.repl.state.StateManagerImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +49,7 @@ public class REPLModule extends AbstractModule {
         bind(Executor.class).to(ExecutorImpl.class).in(Singleton.class);
         bind(new TypeLiteral<EntityVisitor<String>>(){}).to(PlainDescriptions.class);
         bind(new TypeLiteral<EntityVisitor<Query>>(){}).to(QueryVisitor.class);
+        bind(StateManager.class).to(StateManagerImpl.class).in(Singleton.class);
 
         MapBinder<String, Command> commandBinder = MapBinder.newMapBinder(binder(), String.class, Command.class);
         commandBinder.addBinding("stack").to(ShowStack.class).in(Singleton.class);
@@ -66,19 +69,5 @@ public class REPLModule extends AbstractModule {
         commandBinder.addBinding("expand").to(ExpandCommand.class).in(Singleton.class);
         commandBinder.addBinding("math").to(MathCommand.class).in(Singleton.class);
         commandBinder.addBinding("cmp").to(CompareCommand.class).in(Singleton.class);
-    }
-
-    @Provides
-    @Singleton
-    @Named("replstack")
-    public Stack<Object> provideStack() {
-        return new Stack<>();
-    }
-
-    @Provides
-    @Singleton
-    @Named("replvars")
-    public Map<String, Object> provideLocals() {
-        return new HashMap<>();
     }
 }

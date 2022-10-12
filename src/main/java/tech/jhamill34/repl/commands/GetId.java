@@ -11,6 +11,7 @@ import tech.jhamill34.entities.EntityVisitor;
 import tech.jhamill34.entities.FieldEntity;
 import tech.jhamill34.entities.InstructionEntity;
 import tech.jhamill34.entities.MethodEntity;
+import tech.jhamill34.repl.StateManager;
 import tech.jhamill34.repl.executors.Command;
 import tech.jhamill34.tree.ClassRepository;
 import tech.jhamill34.tree.InstructionRepository;
@@ -32,11 +33,12 @@ public class GetId implements Command {
     private InstructionRepository instructionRepository;
 
     @Inject
-    @Named("replstack")
-    private Stack<Object> stack;
+    private StateManager stateManager;
 
     @Override
     public String execute(List<String> operands) {
+        Stack<Object> stack = stateManager.getStack();
+
         char type;
         if (operands.size() == 0) {
             type = stack.pop().toString().charAt(0);

@@ -6,6 +6,7 @@ import tech.jhamill34.analyze.IdValue;
 import tech.jhamill34.entities.ClassEntity;
 import tech.jhamill34.entities.MethodEntity;
 import tech.jhamill34.pico.ClasspathAnalyzer;
+import tech.jhamill34.repl.StateManager;
 import tech.jhamill34.repl.executors.Command;
 
 import java.util.ArrayList;
@@ -19,11 +20,12 @@ public class InvokeCommand implements Command {
     private ClasspathAnalyzer classpathAnalyzer;
 
     @Inject
-    @Named("replstack")
-    private Stack<Object> stack;
+    private StateManager stateManager;
 
     @Override
     public String execute(List<String> operands) {
+        Stack<Object> stack = stateManager.getStack();
+
         List<IdValue> args = new LinkedList<>();
         if (operands.size() > 0) {
             try {

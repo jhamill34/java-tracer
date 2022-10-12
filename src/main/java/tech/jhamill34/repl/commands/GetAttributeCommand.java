@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import tech.jhamill34.entities.Entity;
 import tech.jhamill34.entities.EntityVisitor;
+import tech.jhamill34.repl.StateManager;
 import tech.jhamill34.repl.commands.attributes.Query;
 import tech.jhamill34.repl.commands.attributes.QueryException;
 import tech.jhamill34.repl.executors.Command;
@@ -16,11 +17,12 @@ public class GetAttributeCommand implements Command {
     private EntityVisitor<Query> queryVisitor;
 
     @Inject
-    @Named("replstack")
-    private Stack<Object> stack;
+    private StateManager stateManager;
 
     @Override
     public String execute(List<String> operands) {
+        Stack<Object> stack = stateManager.getStack();
+
         String attribute;
         if (operands.size() > 0) {
             attribute = operands.get(0);

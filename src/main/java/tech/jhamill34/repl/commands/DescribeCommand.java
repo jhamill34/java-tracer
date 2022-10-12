@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import tech.jhamill34.entities.Entity;
 import tech.jhamill34.entities.EntityVisitor;
+import tech.jhamill34.repl.StateManager;
 import tech.jhamill34.repl.executors.Command;
 
 import java.util.List;
@@ -14,11 +15,11 @@ public class DescribeCommand implements Command {
     private EntityVisitor<String> entityVisitor;
 
     @Inject
-    @Named("replstack")
-    private Stack<Object> stack;
+    private StateManager stateManager;
 
     @Override
     public String execute(List<String> operands) {
+        Stack<Object> stack = stateManager.getStack();
         Object top = stack.pop();
 
         if (top instanceof Entity) {

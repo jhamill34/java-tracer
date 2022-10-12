@@ -23,8 +23,7 @@ public class SimpleScriptHandler implements ScriptHandler {
     private ReporterFactory reporterFactory;
 
     @Inject
-    @Named("replstack")
-    private Stack<Object> stack;
+    private StateManager stateManager;
 
     @Override
     public void start(String source) {
@@ -58,6 +57,7 @@ public class SimpleScriptHandler implements ScriptHandler {
                     operands.add(parts[i].trim());
                 }
 
+                Stack<Object> stack = stateManager.getStack();
                 switch (cmd) {
                     case "print":
                         reporter.write(stack.pop().toString() + "\n");
@@ -73,6 +73,10 @@ public class SimpleScriptHandler implements ScriptHandler {
                         } else {
                             ip++;
                         }
+                        break;
+                    case "call":
+                    case "return":
+                        ip++;
                         break;
                     default:
                         executor.execute(cmd, operands);

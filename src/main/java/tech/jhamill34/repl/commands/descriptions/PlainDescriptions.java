@@ -1,7 +1,6 @@
 package tech.jhamill34.repl.commands.descriptions;
 
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import tech.jhamill34.analyze.IdValue;
 import tech.jhamill34.entities.ClassEntity;
 import tech.jhamill34.entities.EntityVisitor;

@@ -29,10 +29,6 @@ public class SummaryCommand implements Command {
     @Inject
     private HeapStore heapStore;
 
-    @Inject
-    @Named("replstack")
-    private Stack<Object> stack;
-
     @Override
     public String execute(List<String> operands) {
         StringBuilder sb = new StringBuilder();

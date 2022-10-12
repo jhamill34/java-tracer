@@ -3,6 +3,7 @@ package tech.jhamill34.repl.commands;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import tech.jhamill34.analyze.HeapStore;
+import tech.jhamill34.repl.StateManager;
 import tech.jhamill34.repl.executors.Command;
 import tech.jhamill34.tree.ClassRepository;
 import tech.jhamill34.tree.InstructionRepository;
@@ -25,11 +26,12 @@ public class FindCommand implements Command {
     private HeapStore heapStore;
 
     @Inject
-    @Named("replstack")
-    private Stack<Object> stack;
+    private StateManager stateManager;
 
     @Override
     public String execute(List<String> operands) {
+        Stack<Object> stack = stateManager.getStack();
+
         char type;
         if (operands.size() == 0) {
             type = stack.pop().toString().charAt(0);
