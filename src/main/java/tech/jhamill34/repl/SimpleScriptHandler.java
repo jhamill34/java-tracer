@@ -45,6 +45,8 @@ public class SimpleScriptHandler implements ScriptHandler {
             }
         }
 
+        stateManager.push(commands.length, 0);
+
         try (Reporter reporter = reporterFactory.createWithTitle("SCRIPT")) {
             while (ip < commands.length) {
                 String line = commands[ip];
@@ -75,8 +77,13 @@ public class SimpleScriptHandler implements ScriptHandler {
                         }
                         break;
                     case "call":
+                        String label = operands.get(0);
+                        int argc = Integer.parseInt(operands.get(1));
+                        stateManager.push(ip + 1, argc);
+                        ip = labelIndex.get(label);
+                        break;
                     case "return":
-                        ip++;
+                        ip = stateManager.pop();
                         break;
                     default:
                         executor.execute(cmd, operands);
@@ -85,6 +92,7 @@ public class SimpleScriptHandler implements ScriptHandler {
             }
         } catch (Exception e) {
             System.err.println("Something went wrong...");
+            e.printStackTrace();
         }
     }
 }

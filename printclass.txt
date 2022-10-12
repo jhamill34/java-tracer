@@ -1,24 +1,40 @@
 goto main
 
-main:
-    push tech/jhamill34/app/Application main([Ljava/lang/String;)V
-    store method
-    store mainClass
-    load mainClass
+getClass:
     push C
     id
     push C
     find
+    return
+
+getMethod:
+    push M
+    id
+    push M
+    find
+    return
+
+simulate:
+    invoke
+    return
+
+test:
+    call getClass 1
     dup
     store mainClass
 
-    load method
-    push M
-    id
-    push M
-    find
-    store method
-
+    swap
+    call getMethod 2
     load mainClass
-    load method
-    invoke
+    swap
+
+    call simulate 2
+    return
+
+main:
+    push hello
+    push main([Ljava/lang/String;)V
+    push tech/jhamill34/app/Application
+    call test 2
+    print
+
