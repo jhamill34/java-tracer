@@ -29,7 +29,7 @@ public class SimpleScriptHandler implements ScriptHandler {
     private Compiler compiler;
 
     @Override
-    public void start(String source) {
+    public void start(String source, List<String> args) {
         String[] commands = compiler.compile(source);
         int ip = 0;
 
@@ -49,6 +49,11 @@ public class SimpleScriptHandler implements ScriptHandler {
         }
 
         stateManager.push(commands.length, 0);
+        Stack<Object> stack = stateManager.getStack();
+        for (String arg : args) {
+            stack.push(arg);
+        }
+
 
         try (Reporter reporter = reporterFactory.createWithTitle("SCRIPT")) {
             while (ip < commands.length) {
@@ -62,7 +67,7 @@ public class SimpleScriptHandler implements ScriptHandler {
                     operands.add(parts[i].trim());
                 }
 
-                Stack<Object> stack = stateManager.getStack();
+                stack = stateManager.getStack();
                 switch (cmd) {
                     case "print":
                         reporter.write(stack.pop().toString() + "\n");

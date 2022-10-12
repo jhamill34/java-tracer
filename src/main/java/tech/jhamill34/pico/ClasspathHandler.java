@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 @CommandLine.Command(
@@ -54,6 +55,12 @@ public class ClasspathHandler implements CLIHandler {
     )
     private String scriptFile;
 
+    @CommandLine.Option(
+            names = {"-a", "--arg"},
+            description = "Arguments to pass to the scriptFile specified"
+    )
+    private List<String> scriptArgs;
+
     @Override
     public void run() {
         if (classPathFile != null) {
@@ -78,9 +85,14 @@ public class ClasspathHandler implements CLIHandler {
         }
 
         if (scriptFile != null) {
+            List<String> args = Collections.emptyList();
+            if (scriptArgs != null) {
+                args = scriptArgs;
+            }
+
             try {
                 String scriptContents = Files.asCharSource(new File(scriptFile), StandardCharsets.UTF_8).read();
-                scriptHandler.start(scriptContents);
+                scriptHandler.start(scriptContents, args);
             } catch (IOException e) {
                 logger.error("Failed to read script", e);
             }
