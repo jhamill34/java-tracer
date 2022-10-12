@@ -24,31 +24,16 @@ public class ClasspathHandler implements CLIHandler {
     private PathProcessor pathProcessor;
 
     @Inject
-    private ClasspathAnalyzer classpathAnalyzer;
-
-    @Inject
-    private Set<Report> reports;
-
-    @Inject
     private REPLHandler replHandler;
+
+    @Inject
+    private ScriptHandler scriptHandler;
 
     @CommandLine.Option(
             names = {"-cp", "--classpath"},
             description = "The classpath to analylze from a file"
     )
     private String classPathFile;
-
-    @CommandLine.Option(
-            names = {"-m", "--mainClass"},
-            description = "For analysis this class will be used as the starting point"
-    )
-    private String mainClass;
-
-    @CommandLine.Option(
-            names = {"-s", "--start"},
-            description = "First method to call in analysis"
-    )
-    private String startingMethod;
 
     @CommandLine.Option(
             names = {"-i", "--interactive"},
@@ -62,6 +47,12 @@ public class ClasspathHandler implements CLIHandler {
             defaultValue = ":"
     )
     private String classPathDelimiter;
+
+    @CommandLine.Option(
+            names = {"-x", "--script"},
+            description = "Script to execute"
+    )
+    private String scriptFile;
 
     @Override
     public void run() {
@@ -86,19 +77,17 @@ public class ClasspathHandler implements CLIHandler {
             System.out.println("Done!");
         }
 
+        if (scriptFile != null) {
+            try {
+                String scriptContents = Files.asCharSource(new File(scriptFile), StandardCharsets.UTF_8).read();
+                scriptHandler.start(scriptContents);
+            } catch (IOException e) {
+                logger.error("Failed to read script", e);
+            }
+        }
+
         if (interactive) {
             replHandler.start();
-        } else {
-            if (mainClass == null || startingMethod == null) {
-                System.out.println("If not running in interactive mode, please supply an entry point to create a report");
-                return;
-            }
-
-            classpathAnalyzer.analyze(mainClass, startingMethod, Collections.emptyList());
-
-            for (Report report : reports) {
-                report.report();
-            }
         }
     }
 }

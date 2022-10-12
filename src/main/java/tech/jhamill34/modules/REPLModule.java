@@ -8,8 +8,11 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Named;
 import tech.jhamill34.entities.EntityVisitor;
 import tech.jhamill34.pico.REPLHandler;
+import tech.jhamill34.pico.ScriptHandler;
 import tech.jhamill34.repl.Executor;
 import tech.jhamill34.repl.SimpleREPLHandler;
+import tech.jhamill34.repl.SimpleScriptHandler;
+import tech.jhamill34.repl.commands.CompareCommand;
 import tech.jhamill34.repl.commands.DescribeCommand;
 import tech.jhamill34.repl.commands.Duplicate;
 import tech.jhamill34.repl.commands.ExpandCommand;
@@ -18,6 +21,7 @@ import tech.jhamill34.repl.commands.GetAttributeCommand;
 import tech.jhamill34.repl.commands.GetId;
 import tech.jhamill34.repl.commands.InvokeCommand;
 import tech.jhamill34.repl.commands.LoadCommand;
+import tech.jhamill34.repl.commands.MathCommand;
 import tech.jhamill34.repl.commands.PopCommand;
 import tech.jhamill34.repl.commands.PushCommand;
 import tech.jhamill34.repl.commands.ShowLocals;
@@ -38,6 +42,7 @@ import java.util.Stack;
 public class REPLModule extends AbstractModule {
     @Override
     protected void configure() {
+        bind(ScriptHandler.class).to(SimpleScriptHandler.class).in(Singleton.class);
         bind(REPLHandler.class).to(SimpleREPLHandler.class).in(Singleton.class);
         bind(Executor.class).to(ExecutorImpl.class).in(Singleton.class);
         bind(new TypeLiteral<EntityVisitor<String>>(){}).to(PlainDescriptions.class);
@@ -59,6 +64,8 @@ public class REPLModule extends AbstractModule {
         commandBinder.addBinding("store").to(StoreCommand.class).in(Singleton.class);
         commandBinder.addBinding("attr").to(GetAttributeCommand.class).in(Singleton.class);
         commandBinder.addBinding("expand").to(ExpandCommand.class).in(Singleton.class);
+        commandBinder.addBinding("math").to(MathCommand.class).in(Singleton.class);
+        commandBinder.addBinding("cmp").to(CompareCommand.class).in(Singleton.class);
     }
 
     @Provides

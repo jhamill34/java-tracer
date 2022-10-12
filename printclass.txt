@@ -1,0 +1,24 @@
+goto main
+
+main:
+    push tech/jhamill34/app/Application main([Ljava/lang/String;)V
+    store method
+    store mainClass
+    load mainClass
+    push C
+    id
+    push C
+    find
+    dup
+    store mainClass
+
+    load method
+    push M
+    id
+    push M
+    find
+    store method
+
+    load mainClass
+    load method
+    invoke

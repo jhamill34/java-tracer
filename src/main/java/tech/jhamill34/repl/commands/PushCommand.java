@@ -16,7 +16,12 @@ public class PushCommand implements Command {
     @Override
     public String execute(List<String> operands) {
         for (String operand : operands) {
-            stack.push(operand);
+            try {
+                int number = Integer.parseInt(operand);
+                stack.push(number);
+            } catch (NumberFormatException e) {
+                stack.push(operand);
+            }
         }
 
         return "Added " + operands.size() + " items to stack";

@@ -10,25 +10,19 @@ import java.util.Map;
 import java.util.Stack;
 
 public class ExecutorImpl implements Executor {
-    private static final String DELIM = ":";
-
     @Inject
     private Map<String, Command> commands;
 
     @Override
-    public String execute(String input) {
-        String[] parts = input.split(DELIM);
-        String cmd = parts[0].trim();
-
-        List<String> operands = new ArrayList<>();
-        for (int i = 1; i < parts.length; i++) {
-            operands.add(parts[i].trim());
-        }
-
+    public String execute(String cmd, List<String> operands) {
         if (commands.containsKey(cmd)) {
             return commands.get(cmd).execute(operands);
         }
 
-        return "Unknown command: " + input;
+        if (cmd.isEmpty()) {
+            return "";
+        }
+
+        return "Unknown command: " + cmd;
     }
 }

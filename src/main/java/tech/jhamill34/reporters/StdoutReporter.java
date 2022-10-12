@@ -5,7 +5,7 @@ import tech.jhamill34.reports.Reporter;
 public class StdoutReporter implements Reporter {
     @Override
     public void write(String value) {
-        System.out.println(value);
+        System.out.print(value);
     }
 
     @Override
