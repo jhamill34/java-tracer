@@ -22,6 +22,7 @@ public class Tokenizer {
         KEYWORDS.put("fun", TokenType.FUN);
         KEYWORDS.put("return", TokenType.RETURN);
         KEYWORDS.put("export", TokenType.EXPORT);
+        KEYWORDS.put("include", TokenType.INCLUDE);
     }
 
     public Tokenizer(String source) {

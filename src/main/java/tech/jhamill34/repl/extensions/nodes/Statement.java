@@ -106,6 +106,19 @@ public abstract class Statement {
         }
     }
 
+    @RequiredArgsConstructor(staticName = "of")
+    @Getter
+    public static class Include extends Statement {
+        final Token keyword;
+        final Token file;
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitInclude(this);
+        }
+    }
+    
+
     public interface Visitor<R> {
         R visitExprStatement(ExprStatement stmt);
         R visitVar(Var stmt);
@@ -115,5 +128,6 @@ public abstract class Statement {
         R visitFunction(FunctionDecl stmt);
         R visitReturn(Return stmt);
         R visitExport(Export stmt);
+        R visitInclude(Include include);
     }
 }

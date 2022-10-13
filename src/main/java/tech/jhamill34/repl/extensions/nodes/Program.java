@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 public class Program {
     final List<Statement> statements;
+    final List<Statement> includes;
     final List<Statement> functionDeclarations;
     final Statement exportStatement;
 

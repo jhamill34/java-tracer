@@ -18,6 +18,7 @@ public class Parser {
     }
 
     public Program parse() throws ParserException {
+        List<Statement> includes = new ArrayList<>();
         List<Statement> statements = new ArrayList<>();
         List<Statement> functionDeclarations = new ArrayList<>();
         Statement exportStatement = null;
@@ -31,13 +32,23 @@ public class Parser {
                 } else {
                     throw error(previous(), "Only one export statement allowed");
                 }
+            } else if (match(TokenType.INCLUDE)) {
+                includes.add(includeStatement());
             } else {
                 statements.add(declaration());
             }
         }
 
-        return Program.of(statements, functionDeclarations, exportStatement);
+        return Program.of(statements, includes, functionDeclarations, exportStatement);
     }
+
+    private Statement includeStatement() throws ParserException {
+        Token include = consume(TokenType.STRING, "Expected a string for including");
+        consume(TokenType.SEMICOLON, "Expected ';' after include statement.");
+
+        return Statement.Include.of(previous(), include);
+    }
+
 
     private Statement declaration() throws ParserException {
             if (match(TokenType.VAR)) return varDeclaration();

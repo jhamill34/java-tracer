@@ -5,23 +5,20 @@ import tech.jhamill34.FeatureFlags;
 import tech.jhamill34.repl.Compiler;
 import tech.jhamill34.repl.extensions.nodes.Program;
 
-import java.util.List;
-
 public class CompilerImpl implements Compiler {
     @Inject
     private FeatureFlags featureFlags;
 
+    @Inject
+    private ASTPipeline pipeline;
+
     @Override
     public String[] compile(String source) {
         if (featureFlags.canUseExtendedCompiler()) {
-            Tokenizer tokenizer = new Tokenizer(source);
-            CodeGenerator codeGenerator = new CodeGenerator();
+            CodeGenerator codeGenerator = new CodeGenerator(pipeline);
 
             try {
-                List<Token> tokens = tokenizer.scanTokens();
-                Parser parser = new Parser(tokens);
-
-                Program program = parser.parse();
+                Program program = pipeline.execute(source);
                 program.accept(codeGenerator);
             } catch (TokenizerException | ParserException e) {
                 System.out.println(e.getMessage());

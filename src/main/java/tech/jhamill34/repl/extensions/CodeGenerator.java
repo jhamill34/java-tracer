@@ -1,10 +1,15 @@
 package tech.jhamill34.repl.extensions;
 
+import com.google.common.io.Files;
 import tech.jhamill34.repl.extensions.nodes.Expression;
 import tech.jhamill34.repl.extensions.nodes.Program;
 import tech.jhamill34.repl.extensions.nodes.Statement;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +19,12 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
     private Environment currentEnv = null;
     private final Set<String> functions = new HashSet<>();
     private final List<String> commands = new ArrayList<>();
+    private final ASTPipeline pipeline;
+    private final Set<String> includedFiles = new HashSet<>();
+
+    public CodeGenerator(ASTPipeline pipeline) {
+        this.pipeline = pipeline;
+    }
 
     public List<String> getCommands() {
         return commands;
@@ -128,6 +139,10 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
         Environment root = Environment.of(null);
         commands.add("goto main");
 
+        for (Statement include : program.getIncludes()) {
+            include.accept(this);
+        }
+
         // Add built in methods here
         executeBlock(program.getFunctionDeclarations(), root);
 
@@ -219,6 +234,60 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
     @Override
     public Void visitExport(Statement.Export stmt) {
         return null;
+    }
+
+    @Override
+    public Void visitInclude(Statement.Include include) {
+        String fileName = include.getFile().getLiteral().toString();
+
+        if (includedFiles.contains(fileName)) {
+            throw new RuntimeException("Circular dependency: " + fileName);
+        }
+
+        if (fileName.equals("native")) {
+            includeNative();
+            includedFiles.add(fileName);
+        } else {
+            try {
+                String content = Files.asCharSource(new File(fileName), StandardCharsets.UTF_8).read();
+                Program subProgram = pipeline.execute(content);
+
+                for (Statement stmt : subProgram.getIncludes()) {
+                    stmt.accept(this);
+                }
+
+                for (Statement stmt : subProgram.getFunctionDeclarations()) {
+                    stmt.accept(this);
+                }
+                includedFiles.add(fileName);
+            } catch (IOException | ParserException | TokenizerException e) {
+                System.err.println(e.getMessage());
+            }
+        }
+
+        return null;
+    }
+
+    private void includeNative() {
+        functions.add("getClass");
+        commands.addAll(Arrays.asList(
+                "getClass:",
+                "push C",
+                "id",
+                "push C",
+                "find",
+                "return"
+        ));
+
+        functions.add("getMethod");
+        commands.addAll(Arrays.asList(
+            "getMethod:",
+            "push M",
+            "id",
+            "push M",
+            "find",
+            "return"
+        ));
     }
 
     private void executeBlock(List<Statement> statements, Environment env) {
