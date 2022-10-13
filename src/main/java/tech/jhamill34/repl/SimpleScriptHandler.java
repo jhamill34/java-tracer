@@ -84,9 +84,8 @@ public class SimpleScriptHandler implements ScriptHandler {
                         }
                         break;
                     case "call":
-                        String label = operands.get(0);
-                        int argc = Integer.parseInt(operands.get(1));
-                        stateManager.push(ip + 1, argc);
+                        int argc = Integer.parseInt(operands.get(0));
+                        String label = stateManager.push(ip + 1, argc);
                         ip = labelIndex.get(label);
                         break;
                     case "return":

@@ -13,31 +13,38 @@ public class StateManagerImpl implements StateManager {
     }
 
     @Override
-    public void push(int returnAddress, int argc) {
+    public String push(int returnAddress, int argc) {
+        String label = null;
+
         if (argc == 0) {
+            if (!this.frames.isEmpty()) {
+                label = (String) getStack().pop();
+            }
             this.frames.push(new Frame(returnAddress));
+        } else {
+            // Get previous stack
+            Stack<Object> stack = getStack();
+
+            // Copy the top N items on stack
+            Object[] args = new Object[argc];
+            for (int i = argc - 1; i >= 0; i--) {
+                args[i] = stack.pop();
+            }
+            label = (String) stack.pop();
+
+            // Create new stack
+            this.frames.push(new Frame(returnAddress));
+
+            // Get new stack
+            stack = getStack();
+
+            // Copy N items to new stack, effectively passing arguments
+            for (int i = 0; i < argc; i++) {
+                stack.push(args[i]);
+            }
         }
 
-
-        // Get previous stack
-        Stack<Object> stack = getStack();
-
-        // Copy the top N items on stack
-        Object[] args = new Object[argc];
-        for (int i = argc - 1; i >= 0; i--) {
-            args[i] = stack.pop();
-        }
-
-        // Create new stack
-        this.frames.push(new Frame(returnAddress));
-
-        // Get new stack
-        stack = getStack();
-
-        // Copy N items to new stack, effectively passing arguments
-        for (int i = 0; i < argc; i++) {
-            stack.push(args[i]);
-        }
+        return label;
     }
 
     @Override

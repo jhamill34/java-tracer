@@ -1,9 +1,9 @@
 package tech.jhamill34.repl.extensions;
 
 import tech.jhamill34.repl.extensions.nodes.Expression;
+import tech.jhamill34.repl.extensions.nodes.Program;
 import tech.jhamill34.repl.extensions.nodes.Statement;
 
-import java.lang.reflect.MalformedParameterizedTypeException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,18 +17,30 @@ public class Parser {
         this.tokens = tokens;
     }
 
-    public List<Statement> parse() throws ParserException {
+    public Program parse() throws ParserException {
         List<Statement> statements = new ArrayList<>();
+        List<Statement> functionDeclarations = new ArrayList<>();
+        Statement exportStatement = null;
+
         while(!isAtEnd()) {
-            statements.add(declaration());
+            if (match(TokenType.FUN)) {
+                functionDeclarations.add(functionDeclaration());
+            } else if (match(TokenType.EXPORT)) {
+                if (exportStatement == null) {
+                    exportStatement = exportStatement();
+                } else {
+                    throw error(previous(), "Only one export statement allowed");
+                }
+            } else {
+                statements.add(declaration());
+            }
         }
 
-        return statements;
+        return Program.of(statements, functionDeclarations, exportStatement);
     }
 
     private Statement declaration() throws ParserException {
             if (match(TokenType.VAR)) return varDeclaration();
-            if (match(TokenType.FUN)) return functionDeclaration();
 
             return statement();
     }
@@ -38,7 +50,6 @@ public class Parser {
         if (match(TokenType.IF)) return ifStatement();
         if (match(TokenType.WHILE)) return whileStatement();
         if (match(TokenType.RETURN)) return returnStatement();
-        if (match(TokenType.EXPORT)) return exportStatement();
 
         return expressionStatement();
     }
