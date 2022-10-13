@@ -289,12 +289,29 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
 
         functions.add("getMethod");
         commands.addAll(Arrays.asList(
-            "getMethod:",
-            "push M",
-            "id",
-            "push M",
-            "find",
-            "return"
+                "getMethod:",
+                "push M",
+                "id",
+                "push M",
+                "find",
+                "return"
+        ));
+
+        functions.add("getField");
+        commands.addAll(Arrays.asList(
+                "getField:",
+                "push F",
+                "id",
+                "push F",
+                "find",
+                "return"
+        ));
+
+        functions.add("simulate");
+        commands.addAll(Arrays.asList(
+                "simulate:",
+                "invoke",
+                "return"
         ));
     }
 

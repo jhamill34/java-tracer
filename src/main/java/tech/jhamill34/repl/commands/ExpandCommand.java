@@ -1,7 +1,6 @@
 package tech.jhamill34.repl.commands;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import tech.jhamill34.repl.StateManager;
 import tech.jhamill34.repl.executors.Command;
 
@@ -21,8 +20,8 @@ public class ExpandCommand implements Command {
         if (top instanceof List) {
             List<?> items = (List<?>) top;
 
-            for (Object item : items) {
-                stack.push(item);
+            for (int i = items.size() - 1; i >= 0; i--) {
+                stack.push(items.get(i));
             }
 
             stack.push(items.size());

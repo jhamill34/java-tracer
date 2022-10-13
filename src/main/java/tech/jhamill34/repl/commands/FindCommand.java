@@ -6,6 +6,7 @@ import tech.jhamill34.analyze.HeapStore;
 import tech.jhamill34.repl.StateManager;
 import tech.jhamill34.repl.executors.Command;
 import tech.jhamill34.tree.ClassRepository;
+import tech.jhamill34.tree.FieldRepository;
 import tech.jhamill34.tree.InstructionRepository;
 import tech.jhamill34.tree.MethodRepository;
 
@@ -21,6 +22,9 @@ public class FindCommand implements Command {
 
     @Inject
     private InstructionRepository instructionRepository;
+
+    @Inject
+    private FieldRepository fieldRepository;
 
     @Inject
     private HeapStore heapStore;
@@ -58,6 +62,8 @@ public class FindCommand implements Command {
             stack.push(classRepository.findById(id));
         } else if (type == 'M') {
             stack.push(methodRepository.findById(id));
+        } else if (type == 'F') {
+            stack.push(fieldRepository.findById(id));
         } else if (type == 'I') {
             stack.push(instructionRepository.findById(id));
         } else if (type == 'V') {

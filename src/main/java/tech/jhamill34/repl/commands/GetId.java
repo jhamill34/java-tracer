@@ -1,19 +1,15 @@
 package tech.jhamill34.repl.commands;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.jhamill34.analyze.IdValue;
 import tech.jhamill34.entities.ClassEntity;
 import tech.jhamill34.entities.Entity;
-import tech.jhamill34.entities.EntityVisitor;
-import tech.jhamill34.entities.FieldEntity;
-import tech.jhamill34.entities.InstructionEntity;
 import tech.jhamill34.entities.MethodEntity;
 import tech.jhamill34.repl.StateManager;
 import tech.jhamill34.repl.executors.Command;
 import tech.jhamill34.tree.ClassRepository;
+import tech.jhamill34.tree.FieldRepository;
 import tech.jhamill34.tree.InstructionRepository;
 import tech.jhamill34.tree.MethodRepository;
 
@@ -28,6 +24,9 @@ public class GetId implements Command {
 
     @Inject
     private MethodRepository methodRepository;
+
+    @Inject
+    private FieldRepository fieldRepository;
 
     @Inject
     private InstructionRepository instructionRepository;
@@ -69,6 +68,19 @@ public class GetId implements Command {
                     }
                 } else {
                     return "Invalid stack state, expected class entity after method id: " + next;
+                }
+            } else if (type == 'F') {
+                Object next = stack.pop();
+                if (next instanceof ClassEntity) {
+                    ClassEntity classEntity = (ClassEntity) next;
+                    int id = fieldRepository.getId(classEntity.getId(), identifier);
+                    if (id < 0) {
+                        return "Not found: " + classEntity.getId() + " field identifier " + identifier;
+                    } else {
+                        stack.push(id);
+                    }
+                } else {
+                    return "Invalid stack state, expected class entity after field id: " + next;
                 }
             } else if (type == 'i') {
                 Object next = stack.pop();
