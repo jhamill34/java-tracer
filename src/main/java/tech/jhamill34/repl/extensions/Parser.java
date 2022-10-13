@@ -1,0 +1,349 @@
+package tech.jhamill34.repl.extensions;
+
+import tech.jhamill34.repl.extensions.nodes.Expression;
+import tech.jhamill34.repl.extensions.nodes.Statement;
+
+import java.lang.reflect.MalformedParameterizedTypeException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Parser {
+    private final List<Token> tokens;
+    private int current = 0;
+
+    public Parser(List<Token> tokens) {
+        this.tokens = tokens;
+    }
+
+    public List<Statement> parse() throws ParserException {
+        List<Statement> statements = new ArrayList<>();
+        while(!isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        return statements;
+    }
+
+    private Statement declaration() throws ParserException {
+            if (match(TokenType.VAR)) return varDeclaration();
+            if (match(TokenType.FUN)) return functionDeclaration();
+
+            return statement();
+    }
+
+    private Statement statement() throws ParserException {
+        if (match(TokenType.LEFT_BRACE)) return Statement.Block.of(block());
+        if (match(TokenType.IF)) return ifStatement();
+        if (match(TokenType.WHILE)) return whileStatement();
+        if (match(TokenType.RETURN)) return returnStatement();
+        if (match(TokenType.EXPORT)) return exportStatement();
+
+        return expressionStatement();
+    }
+
+    private Statement functionDeclaration() throws ParserException {
+        Token name = consume(TokenType.IDENTIFIER, "Expected function name.");
+        consume(TokenType.LEFT_PAREN, "Expect '(' after function name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    throw error(peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while(match(TokenType.COMMA));
+        }
+
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+
+        consume(TokenType.LEFT_BRACE, "Expect '{' before function body.");
+        List<Statement> body = block();
+        return Statement.FunctionDecl.of(name, parameters, body);
+    }
+
+    private Statement exportStatement() throws ParserException {
+        consume(TokenType.LEFT_BRACE, "Expect '{' before exporting.");
+
+        List<Token> tokens = new ArrayList<>();
+        Map<Token, Expression> computedTokens = new HashMap<>();
+        if (!check(TokenType.RIGHT_BRACE)) {
+            do {
+                Token token = consume(TokenType.IDENTIFIER, "Expect exported name.");
+
+                if (match(TokenType.COLON)) {
+                    Expression expr = expression();
+                    computedTokens.put(token, expr);
+                } else {
+                    tokens.add(token);
+                }
+            } while(match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after exports.");
+
+        return Statement.Export.of(tokens, computedTokens);
+    }
+
+    private Statement returnStatement() throws ParserException {
+        Token keyword = previous();
+        Expression value = null;
+        if (!check(TokenType.SEMICOLON)) {
+            value = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expected ';' after return value.");
+        return Statement.Return.of(keyword, value);
+    }
+
+    private List<Statement> block() throws ParserException {
+        List<Statement> statements = new ArrayList<>();
+
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+        return statements;
+    }
+
+    private Statement ifStatement() throws ParserException {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after if.");
+        Expression condition = expression();
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Statement thenBranch = statement();
+        Statement elseBranch = null;
+        if (match(TokenType.ELSE)) {
+            elseBranch = statement();
+        }
+
+        return Statement.If.of(condition, thenBranch, elseBranch);
+    }
+
+    private Statement whileStatement() throws ParserException {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after while.");
+        Expression condition = expression();
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after while condition.");
+
+        Statement body = statement();
+
+        return Statement.While.of(condition, body);
+    }
+
+    private Statement varDeclaration() throws ParserException {
+        Token name = consume(TokenType.IDENTIFIER, "Expected variable name.");
+
+        Expression initializer = null;
+        if (match(TokenType.EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+        return Statement.Var.of(name, initializer);
+    }
+
+    private Statement expressionStatement() throws ParserException {
+        Expression expr = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+
+        return Statement.ExprStatement.of(expr);
+    }
+
+    private Expression expression() throws ParserException {
+        return assignment();
+    }
+
+    private Expression assignment() throws ParserException {
+        Expression expr = equality();
+
+        if (match(TokenType.EQUAL)) {
+            Token equals = previous();
+
+            Expression value = assignment();
+
+            if (expr instanceof Expression.Identifier) {
+                Token token = ((Expression.Identifier) expr).getValue();
+                return Expression.Assign.of(token, value);
+            }
+
+            throw error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
+    private Expression equality() throws ParserException {
+        Expression expr = comparison();
+
+        while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
+            Token operator = previous();
+            Expression right = comparison();
+
+            expr = Expression.Binary.of(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expression comparison() throws ParserException {
+        Expression expr = term();
+
+        while (match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)) {
+            Token operator = previous();
+            Expression right = term();
+            expr = Expression.Binary.of(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expression term() throws ParserException {
+        Expression expr = factor();
+
+        while (match(TokenType.MINUS, TokenType.PLUS)) {
+            Token operator = previous();
+            Expression right = factor();
+
+            expr = Expression.Binary.of(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expression factor() throws ParserException {
+        Expression expr = unary();
+
+        while (match(TokenType.STAR, TokenType.SLASH)) {
+            Token operator = previous();
+            Expression right = unary();
+
+            expr = Expression.Binary.of(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expression unary() throws ParserException {
+        if (match(TokenType.BANG, TokenType.MINUS)) {
+            Token operator = previous();
+            Expression right = unary();
+            return Expression.Unary.of(operator, right);
+        }
+
+        return call();
+    }
+
+    private Expression call() throws ParserException {
+        Expression expr = primary();
+
+        while (true) {
+            if (match(TokenType.LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else if (match(TokenType.DOT)) {
+                Token name = consume(TokenType.IDENTIFIER, "Expect propery name after '.'.");
+                expr = Expression.Get.of(expr, name);
+            } else {
+                break;
+            }
+        }
+
+        return expr;
+    }
+
+    private Expression finishCall(Expression callee) throws ParserException {
+        List<Expression> args = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                args.add(expression());
+            } while (match(TokenType.COMMA)) ;
+        }
+
+        Token paren = consume(TokenType.RIGHT_PAREN, "Expected ')' after arguments.");
+
+        return Expression.Call.of(callee, paren, args);
+    }
+
+    private Expression primary() throws ParserException {
+        if (match(TokenType.IDENTIFIER)) {
+            return Expression.Identifier.of(previous());
+        }
+
+        if (match(TokenType.NUMBER, TokenType.STRING)) {
+            return Expression.Literal.of(previous().getLiteral());
+        }
+
+        if (match(TokenType.LEFT_PAREN)) {
+            Expression expression = expression();
+            consume(TokenType.RIGHT_PAREN, "Expected ')' after expression.");
+
+            return Expression.Grouping.of(expression);
+        }
+
+        throw error(peek(), "Expected expression.");
+    }
+
+    private void synchronize() {
+        advance();
+
+        while (!isAtEnd()) {
+            if (previous().getType() == TokenType.SEMICOLON) return;
+
+            switch (peek().getType()) {
+                case FUN:
+                case VAR:
+                case WHILE:
+                    return;
+            }
+
+            advance();
+        }
+    }
+
+    private Token consume(TokenType type, String message) throws ParserException {
+        if (check(type)) return advance();
+        throw error(peek(), message);
+    }
+
+    private ParserException error(Token token, String message) {
+        if (token.getType() == TokenType.EOF) {
+            return new ParserException("line " + token.getLine() + " at end: " + message);
+        } else {
+            return new ParserException("line " + token.getLine() + " at " + token.getLexeme() + ": " + message);
+        }
+    }
+
+    private boolean match(TokenType ...types) {
+        for (TokenType type : types) {
+            if (check(type)) {
+                advance();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean check(TokenType type) {
+        if (isAtEnd()) return false;
+        return peek().getType() == type;
+    }
+
+    private Token advance() {
+        if (!isAtEnd()) current++;
+        return previous();
+    }
+
+    private boolean isAtEnd() {
+        return peek().getType() == TokenType.EOF;
+    }
+
+    private Token peek() {
+        return tokens.get(current);
+    }
+
+    private Token previous() {
+        return tokens.get(current - 1);
+    }
+}

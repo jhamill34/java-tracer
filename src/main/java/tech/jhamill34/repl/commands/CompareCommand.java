@@ -19,13 +19,13 @@ public class CompareCommand implements Command {
             return "Expected a comparison operator";
         }
 
-        char operator = operands.get(0).charAt(0);
+        String operator = operands.get(0);
         Object first = stack.pop();
         Object second = stack.pop();
 
-        if (operator == '=') {
+        if (operator.equals("=")) {
            stack.push(first.equals(second));
-        } else if (operator == '!') {
+        } else if (operator.equals("!")) {
             stack.push(!first.equals(second));
         } else {
             try {
@@ -33,11 +33,17 @@ public class CompareCommand implements Command {
                 int b = Integer.parseInt(second.toString());
 
                 switch (operator) {
-                    case '<':
+                    case "<":
                         stack.push(b < a);
                         break;
-                    case '>':
+                    case ">":
                         stack.push(b > a);
+                        break;
+                    case "<=":
+                        stack.push(b <= a);
+                        break;
+                    case ">=":
+                        stack.push(b >= a);
                         break;
                     default:
                         return "Unknown operator: " + operator;

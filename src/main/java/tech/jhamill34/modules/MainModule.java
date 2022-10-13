@@ -8,6 +8,7 @@ import tech.jhamill34.app.CLI;
 public class MainModule extends AbstractModule {
     @Override
     protected void configure() {
+        install(new FeatureFlagsModule());
         install(new RepositoryModule());
         install(new ReportingModule());
 

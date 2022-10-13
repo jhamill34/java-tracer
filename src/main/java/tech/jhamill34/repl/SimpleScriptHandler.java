@@ -1,7 +1,6 @@
 package tech.jhamill34.repl;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import tech.jhamill34.pico.ScriptHandler;
 import tech.jhamill34.reports.Reporter;
 import tech.jhamill34.reports.ReporterFactory;
