@@ -20,10 +20,12 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
     private final Set<String> functions = new HashSet<>();
     private final List<String> commands = new ArrayList<>();
     private final ASTPipeline pipeline;
+    private final int argc;
     private final Set<String> includedFiles = new HashSet<>();
 
-    public CodeGenerator(ASTPipeline pipeline) {
+    public CodeGenerator(ASTPipeline pipeline, int argc) {
         this.pipeline = pipeline;
+        this.argc = argc;
     }
 
     public List<String> getCommands() {
@@ -147,6 +149,12 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
         executeBlock(program.getFunctionDeclarations(), root);
 
         commands.add("main:");
+
+        for (int i = argc; i > 0; i--) {
+            root.declare("$" + i);
+            commands.add("store " + root.find("$" + i));
+        }
+
         // Execute block without function declarations or export (hoist functions)
         executeBlock(program.getStatements(), root);
 
@@ -241,7 +249,7 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
         String fileName = include.getFile().getLiteral().toString();
 
         if (includedFiles.contains(fileName)) {
-            throw new RuntimeException("Circular dependency: " + fileName);
+            return null;
         }
 
         if (fileName.equals("native")) {

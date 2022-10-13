@@ -13,9 +13,9 @@ public class CompilerImpl implements Compiler {
     private ASTPipeline pipeline;
 
     @Override
-    public String[] compile(String source) {
+    public String[] compile(String source, int argc) {
         if (featureFlags.canUseExtendedCompiler()) {
-            CodeGenerator codeGenerator = new CodeGenerator(pipeline);
+            CodeGenerator codeGenerator = new CodeGenerator(pipeline, argc);
 
             try {
                 Program program = pipeline.execute(source);

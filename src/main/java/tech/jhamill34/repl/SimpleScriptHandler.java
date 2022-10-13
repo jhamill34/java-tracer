@@ -29,7 +29,7 @@ public class SimpleScriptHandler implements ScriptHandler {
 
     @Override
     public void start(String source, List<String> args) {
-        String[] commands = compiler.compile(source);
+        String[] commands = compiler.compile(source, args.size());
         int ip = 0;
 
         Map<String, Integer> labelIndex = new HashMap<>();
