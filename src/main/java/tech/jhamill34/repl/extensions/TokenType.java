@@ -14,7 +14,7 @@ public enum TokenType {
     IDENTIFIER, STRING, NUMBER,
 
     // Keywords
-    VAR, IF, ELSE, WHILE, FUN, RETURN, EXPORT, INCLUDE,
+    VAR, IF, ELSE, WHILE, FUN, RETURN, EXPORT, INCLUDE, FOR, IN,
 
     EOF
 }

@@ -60,9 +60,25 @@ public class Parser {
         if (match(TokenType.LEFT_BRACE)) return Statement.Block.of(block());
         if (match(TokenType.IF)) return ifStatement();
         if (match(TokenType.WHILE)) return whileStatement();
+        if (match(TokenType.FOR)) return forEachStatement();
         if (match(TokenType.RETURN)) return returnStatement();
 
         return expressionStatement();
+    }
+
+    private Statement forEachStatement() throws ParserException {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after for.");
+        consume(TokenType.VAR, "Expect item declaration with 'var' at start of for-each loop.");
+
+        Token item = consume(TokenType.IDENTIFIER, "Expect identifier declaration.");
+        consume(TokenType.IN, "Expect 'in' after item declaration.");
+
+        Expression iterable = expression();
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after iterable in for-each loop.");
+
+        Statement body = statement();
+
+        return Statement.ForEach.of(item, iterable, body);
     }
 
     private Statement functionDeclaration() throws ParserException {

@@ -23,6 +23,8 @@ public class Tokenizer {
         KEYWORDS.put("return", TokenType.RETURN);
         KEYWORDS.put("export", TokenType.EXPORT);
         KEYWORDS.put("include", TokenType.INCLUDE);
+        KEYWORDS.put("for", TokenType.FOR);
+        KEYWORDS.put("in", TokenType.IN);
     }
 
     public Tokenizer(String source) {

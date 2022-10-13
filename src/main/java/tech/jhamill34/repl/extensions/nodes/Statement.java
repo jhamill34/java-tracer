@@ -117,6 +117,19 @@ public abstract class Statement {
             return visitor.visitInclude(this);
         }
     }
+
+    @RequiredArgsConstructor(staticName = "of")
+    @Getter
+    public static class ForEach extends Statement {
+        final Token item;
+        final Expression iterable;
+        final Statement body;
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitForEach(this);
+        }
+    }
     
 
     public interface Visitor<R> {
@@ -128,6 +141,7 @@ public abstract class Statement {
         R visitFunction(FunctionDecl stmt);
         R visitReturn(Return stmt);
         R visitExport(Export stmt);
-        R visitInclude(Include include);
+        R visitInclude(Include stmt);
+        R visitForEach(ForEach stmt);
     }
 }

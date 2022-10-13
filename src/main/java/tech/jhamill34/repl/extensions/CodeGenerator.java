@@ -217,6 +217,53 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
     }
 
     @Override
+    public Void visitForEach(Statement.ForEach stmt) {
+        int currentLabel = labelId++;
+        stmt.getIterable().accept(this);
+        commands.add("expand");
+
+        Environment previousEnv = this.currentEnv;
+        currentEnv = Environment.of(this.currentEnv);
+        // Decalre our item variable
+        currentEnv.declare(stmt.getItem().getLexeme());
+
+        // Prepare our end condition value
+        currentEnv.declare("_total");
+        commands.add("store " + currentEnv.find("_total"));
+
+        // Prepare our counter
+        currentEnv.declare("_idx");
+        commands.add("push 0");
+        commands.add("store " + currentEnv.find("_idx"));
+
+        // Jump to our condition evaluation
+        commands.add("goto condition" + currentLabel);
+
+        // The main body
+        commands.add("body" + currentLabel + ":");
+        commands.add("store " + currentEnv.find(stmt.getItem().getLexeme()));
+        stmt.getBody().accept(this);
+
+        // increment _idx
+        commands.add("load " + currentEnv.find("_idx"));
+        commands.add("push 1");
+        commands.add("math +");
+        commands.add("store " + currentEnv.find("_idx"));
+
+        // Our continue condition
+        commands.add("condition" + currentLabel + ":");
+        commands.add("load " + currentEnv.find("_idx"));
+        commands.add("load " + currentEnv.find("_total"));
+        commands.add("cmp =");
+        commands.add("jmp end" + currentLabel);
+        commands.add("goto body" + currentLabel);
+        commands.add("end" + currentLabel + ":");
+
+        currentEnv = previousEnv;
+        return null;
+    }
+
+    @Override
     public Void visitFunction(Statement.FunctionDecl stmt) {
         commands.add(stmt.getName().getLexeme() + ":");
         functions.add(stmt.getName().getLexeme());
@@ -311,6 +358,13 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
         commands.addAll(Arrays.asList(
                 "simulate:",
                 "invoke",
+                "return"
+        ));
+
+        functions.add("print");
+        commands.addAll(Arrays.asList(
+                "print:",
+                "print",
                 "return"
         ));
     }
