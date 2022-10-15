@@ -83,9 +83,9 @@ public class ASMTreeProcessor implements BytecodeTreeProcessor {
                 }
 
                 int referenceId = -1;
-                InstructionEntity.ReferenceType referenceType = null;
+                String referenceType = null;
                 if (insnNode instanceof MethodInsnNode) {
-                    referenceType = InstructionEntity.ReferenceType.METHOD;
+                    referenceType = InstructionEntity.METHOD;
                     MethodInsnNode methodInsnNode = (MethodInsnNode) insnNode;
 
                     int ownerId = classRepository.getId(methodInsnNode.owner);
@@ -105,7 +105,7 @@ public class ASMTreeProcessor implements BytecodeTreeProcessor {
                                         .build());
                     }
                 } else if (insnNode instanceof FieldInsnNode) {
-                    referenceType = InstructionEntity.ReferenceType.FIELD;
+                    referenceType = InstructionEntity.FIELD;
                     FieldInsnNode fieldInsnNode = (FieldInsnNode) insnNode;
 
                     int ownerId = classRepository.getId(fieldInsnNode.owner);
@@ -161,7 +161,7 @@ public class ASMTreeProcessor implements BytecodeTreeProcessor {
                 .build();
     }
 
-    private InstructionEntity transformInstruction(AbstractInsnNode insnNode, int invokerId, int lineNumber, int index, int referenceId, InstructionEntity.ReferenceType referenceType) {
+    private InstructionEntity transformInstruction(AbstractInsnNode insnNode, int invokerId, int lineNumber, int index, int referenceId, String referenceType) {
         return InstructionEntity.builder()
                 .opCode(insnNode.getOpcode())
                 .invokerId(invokerId)

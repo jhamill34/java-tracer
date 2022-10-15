@@ -43,9 +43,9 @@ public class InstructionResolver {
     public Object getReference(InstructionEntity parent) {
         if (parent.getReferenceId() >= 0) {
             switch (parent.getReferenceType()) {
-                case METHOD:
+                case InstructionEntity.METHOD:
                     return methodRepository.findById(parent.getReferenceId());
-                case FIELD:
+                case InstructionEntity.FIELD:
                     return fieldRepository.findById(parent.getReferenceId());
             }
         }

@@ -14,7 +14,7 @@ public class InstructionEntity implements Entity {
     int lineNumber;
     int index;
     int referenceId;
-    ReferenceType referenceType;
+    String referenceType;
 
     @Override
     public <T> T accept(EntityVisitor<T> entityVisitor) {
@@ -22,8 +22,6 @@ public class InstructionEntity implements Entity {
     }
 
 
-    public enum ReferenceType {
-        METHOD,
-        FIELD
-    }
+    public static final String METHOD = "METHOD";
+    public static final String FIELD = "FIELD";
 }

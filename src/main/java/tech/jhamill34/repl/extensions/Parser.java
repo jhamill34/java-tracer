@@ -304,6 +304,10 @@ public class Parser {
     }
 
     private Expression primary() throws ParserException {
+        if (match(TokenType.NULL)) {
+            return Expression.Literal.of(null);
+        }
+
         if (match(TokenType.IDENTIFIER)) {
             return Expression.Identifier.of(previous());
         }

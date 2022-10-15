@@ -62,7 +62,8 @@ public class SimpleScriptHandler implements ScriptHandler {
                 Stack<Object> stack = stateManager.getStack();
                 switch (cmd) {
                     case "print":
-                        reporter.write(stack.pop().toString() + "\n");
+                        Object value = stack.pop();
+                        reporter.write((value != null ? value.toString() : "null") + "\n");
                         ip++;
                         break;
                     case "goto":

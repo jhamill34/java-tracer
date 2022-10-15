@@ -25,6 +25,7 @@ public class Tokenizer {
         KEYWORDS.put("include", TokenType.INCLUDE);
         KEYWORDS.put("for", TokenType.FOR);
         KEYWORDS.put("in", TokenType.IN);
+        KEYWORDS.put("null", TokenType.NULL);
     }
 
     public Tokenizer(String source) {

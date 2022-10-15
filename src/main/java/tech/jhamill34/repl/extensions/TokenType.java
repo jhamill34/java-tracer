@@ -15,6 +15,7 @@ public enum TokenType {
 
     // Keywords
     VAR, IF, ELSE, WHILE, FUN, RETURN, EXPORT, INCLUDE, FOR, IN,
+    NULL,
 
     EOF
 }
