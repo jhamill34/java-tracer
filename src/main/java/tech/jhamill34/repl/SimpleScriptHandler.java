@@ -47,13 +47,6 @@ public class SimpleScriptHandler implements ScriptHandler {
             }
         }
 
-        stateManager.push(commands.length, 0);
-        Stack<Object> stack = stateManager.getStack();
-        for (String arg : args) {
-            stack.push(arg);
-        }
-
-
         try (Reporter reporter = reporterFactory.createWithTitle("SCRIPT")) {
             while (ip < commands.length) {
                 String line = commands[ip];
@@ -66,7 +59,7 @@ public class SimpleScriptHandler implements ScriptHandler {
                     operands.add(parts[i].trim());
                 }
 
-                stack = stateManager.getStack();
+                Stack<Object> stack = stateManager.getStack();
                 switch (cmd) {
                     case "print":
                         reporter.write(stack.pop().toString() + "\n");

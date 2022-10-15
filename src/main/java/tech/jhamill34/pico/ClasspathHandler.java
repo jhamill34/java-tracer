@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import tech.jhamill34.app.CLIHandler;
+import tech.jhamill34.repl.StateManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 @CommandLine.Command(
         name = "classpath",
@@ -29,6 +31,9 @@ public class ClasspathHandler implements CLIHandler {
 
     @Inject
     private ScriptHandler scriptHandler;
+
+    @Inject
+    private StateManager stateManager;
 
     @CommandLine.Option(
             names = {"-cp", "--classpath"},
@@ -84,12 +89,17 @@ public class ClasspathHandler implements CLIHandler {
             System.out.println("Done!");
         }
 
-        if (scriptFile != null) {
-            List<String> args = Collections.emptyList();
-            if (scriptArgs != null) {
-                args = scriptArgs;
-            }
+        List<String> args = Collections.emptyList();
+        if (scriptArgs != null) {
+            args = scriptArgs;
+        }
+        stateManager.push(-1, 0);
+        Stack<Object> stack = stateManager.getStack();
+        for (String arg : args) {
+            stack.push(arg);
+        }
 
+        if (scriptFile != null) {
             try {
                 String scriptContents = Files.asCharSource(new File(scriptFile), StandardCharsets.UTF_8).read();
                 scriptHandler.start(scriptContents, args);
