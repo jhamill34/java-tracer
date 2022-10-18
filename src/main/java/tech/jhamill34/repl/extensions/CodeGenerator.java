@@ -8,20 +8,20 @@ import tech.jhamill34.repl.extensions.nodes.Statement;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<Void>, Expression.Visitor<Void> {
     private static int labelId = 0;
     private Environment currentEnv = null;
     private final Set<String> functions = new HashSet<>();
     private final List<String> commands = new ArrayList<>();
+    private final Set<String> includedFiles = new HashSet<>();
+
+    private final Map<Object, Integer> constants = new HashMap<>();
+    private static int constantId = 0;
+
     private final ASTPipeline pipeline;
     private final int argc;
-    private final Set<String> includedFiles = new HashSet<>();
 
     public CodeGenerator(ASTPipeline pipeline, int argc) {
         this.pipeline = pipeline;
@@ -29,7 +29,25 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
     }
 
     public List<String> getCommands() {
-        return commands;
+        List<String> result = new ArrayList<>();
+        result.add("" + constants.size());
+        for (Map.Entry<Object, Integer> entry : constants.entrySet()) {
+            Object value = entry.getKey();
+            String type = "_";
+            if (value instanceof Integer) {
+               type = "I";
+            } else if (value instanceof String) {
+                type = "S";
+            } else if (value instanceof Boolean) {
+                type = "B";
+            }
+            result.add("#" + entry.getValue() + ":" + type + entry.getKey());
+        }
+
+        result.add("" + commands.size());
+        result.addAll(commands);
+
+        return result;
     }
 
     @Override
@@ -90,7 +108,15 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
 
     @Override
     public Void visitLiteral(Expression.Literal expr) {
-        commands.add("push " + expr.getValue());
+        Object value = expr.getValue();
+
+        if (!constants.containsKey(value)) {
+            constants.put(value, constantId++);
+        }
+
+        int id = constants.get(value);
+
+        commands.add("push #" + id);
         return null;
     }
 
@@ -305,7 +331,9 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
         } else {
             try {
                 String content = Files.asCharSource(new File(fileName), StandardCharsets.UTF_8).read();
-                Program subProgram = pipeline.execute(content);
+
+                // NOTE: At the moment you can't import a "template"
+                Program subProgram = pipeline.execute(content, false);
 
                 for (Statement stmt : subProgram.getIncludes()) {
                     stmt.accept(this);

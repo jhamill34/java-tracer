@@ -10,6 +10,7 @@ public class Tokenizer {
     private int current = 0;
     private int line = 1;
 
+    private final boolean isTemplate;
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
     private static final Map<String, TokenType> KEYWORDS = new HashMap<>();
@@ -28,7 +29,8 @@ public class Tokenizer {
         KEYWORDS.put("null", TokenType.NULL);
     }
 
-    public Tokenizer(String source) {
+    public Tokenizer(String source, boolean isTemplate) {
+        this.isTemplate = isTemplate;
         this.source = source;
     }
 

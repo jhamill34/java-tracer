@@ -18,11 +18,15 @@ public class PushCommand implements Command {
         Stack<Object> stack = stateManager.getStack();
 
         for (String operand : operands) {
-            try {
-                int number = Integer.parseInt(operand);
-                stack.push(number);
-            } catch (NumberFormatException e) {
-                stack.push(operand);
+            if (operand.startsWith("#")) {
+                stack.push(stateManager.getConstants().get(operand));
+            } else {
+                try {
+                    int number = Integer.parseInt(operand);
+                    stack.push(number);
+                } catch (NumberFormatException e) {
+                    stack.push(operand);
+                }
             }
         }
 

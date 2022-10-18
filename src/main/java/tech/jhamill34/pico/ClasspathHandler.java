@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
+import tech.jhamill34.FeatureFlags;
 import tech.jhamill34.app.CLIHandler;
 import tech.jhamill34.repl.StateManager;
 
@@ -65,6 +66,12 @@ public class ClasspathHandler implements CLIHandler {
     )
     private List<String> scriptArgs;
 
+    @CommandLine.Option(
+            names = {"-t", "--template"},
+            description = "Interpret the script as a template file"
+    )
+    private boolean template;
+
     @Override
     public void run() {
         if (classPathFile != null) {
@@ -101,7 +108,7 @@ public class ClasspathHandler implements CLIHandler {
         if (scriptFile != null) {
             try {
                 String scriptContents = Files.asCharSource(new File(scriptFile), StandardCharsets.UTF_8).read();
-                scriptHandler.start(scriptContents, args);
+                scriptHandler.start(scriptContents, args, template);
             } catch (IOException e) {
                 logger.error("Failed to read script", e);
             }

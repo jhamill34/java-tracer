@@ -24,6 +24,11 @@ public class MathCommand implements Command {
         Object first = stack.pop();
         Object second = stack.pop();
 
+        if ((first instanceof String || second instanceof String) && operand == '+') {
+            stack.push(second.toString() + first.toString());
+            return "Success";
+        }
+
         try {
             int a = Integer.parseInt(first.toString());
             int b = Integer.parseInt(second.toString());

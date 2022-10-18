@@ -8,4 +8,5 @@ public interface StateManager {
     int pop();
     Stack<Object> getStack();
     Map<String, Object> getLocals();
+    Map<String, Object> getConstants();
 }

@@ -13,12 +13,12 @@ public class CompilerImpl implements Compiler {
     private ASTPipeline pipeline;
 
     @Override
-    public String[] compile(String source, int argc) {
+    public String[] compile(String source, int argc, boolean isTemplate) {
         if (featureFlags.canUseExtendedCompiler()) {
             CodeGenerator codeGenerator = new CodeGenerator(pipeline, argc);
 
             try {
-                Program program = pipeline.execute(source);
+                Program program = pipeline.execute(source, isTemplate);
                 program.accept(codeGenerator);
             } catch (TokenizerException | ParserException e) {
                 System.out.println(e.getMessage());

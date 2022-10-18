@@ -49,7 +49,6 @@ public class Parser {
         return Statement.Include.of(previous(), include);
     }
 
-
     private Statement declaration() throws ParserException {
             if (match(TokenType.VAR)) return varDeclaration();
 

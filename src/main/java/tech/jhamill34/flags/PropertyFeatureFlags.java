@@ -13,7 +13,17 @@ public class PropertyFeatureFlags implements FeatureFlags {
 
     @Override
     public boolean canUseExtendedCompiler() {
-         String value =properties.getProperty("compiler.useExtended", "false");
+         String value = properties.getProperty("compiler.useExtended", "false");
          return value.equals("true");
+    }
+
+    @Override
+    public String scriptExtension() {
+        return properties.getProperty("compiler.extension", "jt");
+    }
+
+    @Override
+    public String templateExtension() {
+        return properties.getProperty("template.extension", "jte");
     }
 }

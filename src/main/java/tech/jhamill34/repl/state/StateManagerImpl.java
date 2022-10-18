@@ -2,14 +2,17 @@ package tech.jhamill34.repl.state;
 
 import tech.jhamill34.repl.StateManager;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
 public class StateManagerImpl implements StateManager {
     private final Stack<Frame> frames;
+    private final Map<String, Object> constants;
 
     public StateManagerImpl() {
         this.frames = new Stack<>();
+        this.constants = new HashMap<>();
     }
 
     @Override
@@ -72,5 +75,10 @@ public class StateManagerImpl implements StateManager {
     @Override
     public Map<String, Object> getLocals() {
         return frames.peek().getLocals();
+    }
+
+    @Override
+    public Map<String, Object> getConstants() {
+        return constants;
     }
 }

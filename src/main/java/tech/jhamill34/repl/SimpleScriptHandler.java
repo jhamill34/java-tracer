@@ -28,21 +28,43 @@ public class SimpleScriptHandler implements ScriptHandler {
     private Compiler compiler;
 
     @Override
-    public void start(String source, List<String> args) {
-        String[] commands = compiler.compile(source, args.size());
-        int ip = 0;
+    public void start(String source, List<String> args, boolean isTemplate) {
+        String[] commands = compiler.compile(source, args.size(), isTemplate);
 
+        int current = 0;
+        int numConstants = Integer.parseInt(commands[current++]);
+
+        Map<String, Object> constants = stateManager.getConstants();
+        for (int i = 0; i < numConstants; i++) {
+            String[] constant = commands[current++].split(":");
+
+            char type = constant[1].charAt(0);
+            String value = constant[1].substring(1);
+            switch (type) {
+                case 'I':
+                    constants.put(constant[0], Integer.parseInt(value));
+                    break;
+                case 'B':
+                    constants.put(constant[0], value.equalsIgnoreCase("true"));
+                    break;
+                default:
+                    constants.put(constant[0], value);
+                    break;
+            }
+        }
+
+        int numCommands = Integer.parseInt(commands[current++]);
+        int ip = current;
         Map<String, Integer> labelIndex = new HashMap<>();
-
-        for (int i = 0; i < commands.length; i++) {
-            String line = commands[i];
+        for (int i = 0; i < numCommands; i++, current++) {
+            String line = commands[current];
             if (line.contains(LABEL)) {
                 String[] parts = line.split(LABEL);
-                labelIndex.put(parts[0], i);
+                labelIndex.put(parts[0], current);
                 if (parts.length > 1) {
-                    commands[i] = parts[1];
+                    commands[current] = parts[1];
                 } else {
-                    commands[i] = "";
+                    commands[current] = "";
                 }
             }
         }
