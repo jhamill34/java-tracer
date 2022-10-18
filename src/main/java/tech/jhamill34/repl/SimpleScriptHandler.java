@@ -85,7 +85,7 @@ public class SimpleScriptHandler implements ScriptHandler {
                 switch (cmd) {
                     case "print":
                         Object value = stack.pop();
-                        reporter.write((value != null ? value.toString() : "null") + "\n");
+                        reporter.write((value != null ? value.toString() : "null"));
                         ip++;
                         break;
                     case "goto":

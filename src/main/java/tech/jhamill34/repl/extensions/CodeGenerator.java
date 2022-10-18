@@ -395,6 +395,18 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
                 "print",
                 "return"
         ));
+
+        if (!constants.containsKey("\n")) {
+            constants.put("\n", constantId++);
+        }
+        functions.add("println");
+        commands.addAll(Arrays.asList(
+                "println:",
+                "push #" + constants.get("\n"),
+                "math +",
+                "print",
+                "return"
+        ));
     }
 
     private void executeBlock(List<Statement> statements, Environment env) {
