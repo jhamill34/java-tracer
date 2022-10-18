@@ -130,6 +130,26 @@ public abstract class Statement {
             return visitor.visitForEach(this);
         }
     }
+
+    @RequiredArgsConstructor(staticName = "of")
+    @Getter
+    public static class TemplateStatement extends Statement {
+        final Template template;
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitTemplateStatement(this);
+        }
+    }
+
+    @RequiredArgsConstructor(staticName = "of")
+    @Getter
+    public static class NoOp extends Statement {
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitNoOp(this);
+        }
+    }
     
 
     public interface Visitor<R> {
@@ -143,5 +163,7 @@ public abstract class Statement {
         R visitExport(Export stmt);
         R visitInclude(Include stmt);
         R visitForEach(ForEach stmt);
+        R visitTemplateStatement(TemplateStatement stmt);
+        R visitNoOp(NoOp stmt);
     }
 }

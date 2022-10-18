@@ -36,7 +36,7 @@ public class SimpleScriptHandler implements ScriptHandler {
 
         Map<String, Object> constants = stateManager.getConstants();
         for (int i = 0; i < numConstants; i++) {
-            String[] constant = commands[current++].split(":");
+            String[] constant = commands[current++].split(":", 2);
 
             char type = constant[1].charAt(0);
             String value = constant[1].substring(1);

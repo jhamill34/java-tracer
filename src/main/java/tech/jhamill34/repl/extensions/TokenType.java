@@ -3,7 +3,10 @@ package tech.jhamill34.repl.extensions;
 public enum TokenType {
     // Single character
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, COMMA, SLASH,
-    DOT, MINUS, PLUS, STAR, SEMICOLON, COLON,
+    DOT, MINUS, PLUS, STAR, SEMICOLON, COLON, POUND,
+
+    DOUBLE_LEFT_BRACE,
+    DOUBLE_RIGHT_BRACE,
 
     BANG, BANG_EQUAL,
     EQUAL, EQUAL_EQUAL,

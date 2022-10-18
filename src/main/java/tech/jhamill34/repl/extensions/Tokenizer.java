@@ -9,6 +9,7 @@ public class Tokenizer {
     private int start = 0;
     private int current = 0;
     private int line = 1;
+    private boolean isPlaintext = true;
 
     private final boolean isTemplate;
     private final String source;
@@ -35,6 +36,8 @@ public class Tokenizer {
     }
 
     public List<Token> scanTokens() throws TokenizerException {
+        isPlaintext = peek() != '{' || peekNext() != '{';
+
         while (!isAtEnd()) {
             start = current;
             scanToken();
@@ -52,11 +55,22 @@ public class Tokenizer {
     private void scanToken() throws TokenizerException {
         char c = advance();
 
+        if (isTemplate && isPlaintext) {
+            while (!isAtEnd() && (peek() != '{' || peekNext() != '{')) {
+                if (peek() == '\n') line++;
+
+                advance();
+            }
+
+            String value = source.substring(start, current);
+            addToken(TokenType.STRING, value);
+            isPlaintext = false;
+            return;
+        }
+
         switch (c) {
             case '(': addToken(TokenType.LEFT_PAREN); break;
             case ')': addToken(TokenType.RIGHT_PAREN); break;
-            case '{': addToken(TokenType.LEFT_BRACE); break;
-            case '}': addToken(TokenType.RIGHT_BRACE); break;
             case ',': addToken(TokenType.COMMA); break;
             case '.': addToken(TokenType.DOT); break;
             case '-': addToken(TokenType.MINUS); break;
@@ -64,6 +78,22 @@ public class Tokenizer {
             case ';': addToken(TokenType.SEMICOLON); break;
             case '*': addToken(TokenType.STAR); break;
             case ':': addToken(TokenType.COLON); break;
+            case '#': addToken(TokenType.POUND); break;
+            case '{':
+                if (match('{')) {
+                    addToken(TokenType.DOUBLE_LEFT_BRACE);
+                } else {
+                    addToken(TokenType.LEFT_BRACE);
+                }
+                break;
+            case '}':
+                if (match('}')) {
+                    addToken(TokenType.DOUBLE_RIGHT_BRACE);
+                    isPlaintext = true;
+                } else {
+                    addToken(TokenType.RIGHT_BRACE);
+                }
+                break;
             case '!':
                 addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
                 break;
@@ -160,7 +190,7 @@ public class Tokenizer {
     }
 
     private char peekNext() {
-        if (current + 1 > source.length()) return '\0';
+        if (current + 1 >= source.length()) return '\0';
         return source.charAt(current + 1);
     }
 

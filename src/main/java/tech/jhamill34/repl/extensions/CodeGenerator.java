@@ -4,13 +4,14 @@ import com.google.common.io.Files;
 import tech.jhamill34.repl.extensions.nodes.Expression;
 import tech.jhamill34.repl.extensions.nodes.Program;
 import tech.jhamill34.repl.extensions.nodes.Statement;
+import tech.jhamill34.repl.extensions.nodes.Template;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<Void>, Expression.Visitor<Void> {
+public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<Void>, Expression.Visitor<Void>, Template.Visitor<Void> {
     private static int labelId = 0;
     private Environment currentEnv = null;
     private final Set<String> functions = new HashSet<>();
@@ -163,6 +164,11 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
     }
 
     @Override
+    public Void visitNoOp(Expression.NoOp expr) {
+        return null;
+    }
+
+    @Override
     public Void visitProgram(Program program) {
         Environment root = Environment.of(null);
         commands.add("goto main");
@@ -197,7 +203,7 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
     public Void visitVar(Statement.Var stmt) {
         currentEnv.declare(stmt.getName().getLexeme());
 
-        if (stmt.getInitializer() != null) {
+        if (!(stmt.getInitializer() instanceof Expression.NoOp)) {
             stmt.getInitializer().accept(this);
             commands.add("store " + currentEnv.find(stmt.getName().getLexeme()));
         }
@@ -221,9 +227,7 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
         stmt.getThenBranch().accept(this);
         commands.add("goto end" + currentLabel);
         commands.add("else" + currentLabel + ":");
-        if (stmt.getElseBranch() != null) {
-            stmt.getElseBranch().accept(this);
-        }
+        stmt.getElseBranch().accept(this);
         commands.add("end" + currentLabel + ":");
         return null;
     }
@@ -348,6 +352,44 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
             }
         }
 
+        return null;
+    }
+
+    @Override
+    public Void visitNoOp(Statement.NoOp stmt) {
+        return null;
+    }
+
+    @Override
+    public Void visitTemplateStatement(Statement.TemplateStatement stmt) {
+        stmt.getTemplate().accept(this);
+        return null;
+    }
+
+    @Override
+    public Void visitPrintableExpression(Template.PrintableExpression stmt) {
+        stmt.getExpression().accept(this);
+        commands.add("print");
+        stmt.getNext().accept(this);
+        return null;
+    }
+
+    @Override
+    public Void visitPlainText(Template.PlainText stmt) {
+        if (!constants.containsKey(stmt.getLiteral())) {
+            constants.put(stmt.getLiteral(), constantId++);
+        }
+
+        commands.add("push #" + constants.get(stmt.getLiteral()));
+        commands.add("print");
+
+        stmt.getNext().accept(this);
+
+        return null;
+    }
+
+    @Override
+    public Void visitEmpty(Template.Empty tmp) {
         return null;
     }
 

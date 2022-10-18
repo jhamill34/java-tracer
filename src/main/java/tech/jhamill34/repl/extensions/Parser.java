@@ -3,6 +3,7 @@ package tech.jhamill34.repl.extensions;
 import tech.jhamill34.repl.extensions.nodes.Expression;
 import tech.jhamill34.repl.extensions.nodes.Program;
 import tech.jhamill34.repl.extensions.nodes.Statement;
+import tech.jhamill34.repl.extensions.nodes.Template;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,23 +12,29 @@ import java.util.Map;
 
 public class Parser {
     private final List<Token> tokens;
+    private final boolean isTemplate;
     private int current = 0;
 
-    public Parser(List<Token> tokens) {
+    public Parser(List<Token> tokens, boolean isTemplate) {
         this.tokens = tokens;
+        this.isTemplate = isTemplate;
     }
 
     public Program parse() throws ParserException {
         List<Statement> includes = new ArrayList<>();
         List<Statement> statements = new ArrayList<>();
         List<Statement> functionDeclarations = new ArrayList<>();
-        Statement exportStatement = null;
+        Statement exportStatement = Statement.NoOp.of();
+
+        if (isTemplate && !isAtEnd()) {
+            statements.add(templateStatement(false));
+        }
 
         while(!isAtEnd()) {
             if (match(TokenType.FUN)) {
                 functionDeclarations.add(functionDeclaration());
             } else if (match(TokenType.EXPORT)) {
-                if (exportStatement == null) {
+                if (exportStatement instanceof Statement.NoOp) {
                     exportStatement = exportStatement();
                 } else {
                     throw error(previous(), "Only one export statement allowed");
@@ -62,7 +69,66 @@ public class Parser {
         if (match(TokenType.FOR)) return forEachStatement();
         if (match(TokenType.RETURN)) return returnStatement();
 
+        if (isTemplate && match(TokenType.DOUBLE_RIGHT_BRACE)) return templateStatement(false);
+        if (isTemplate && match(TokenType.MINUS) && match(TokenType.DOUBLE_RIGHT_BRACE)) return templateStatement(true);
+
         return expressionStatement();
+    }
+
+    private Statement templateStatement(boolean trim) throws ParserException {
+        Template template;
+        if (check(TokenType.STRING)) {
+            template = plainTextStatement(trim);
+        } else {
+            consume(TokenType.DOUBLE_LEFT_BRACE, "Expected '{{' before printable expression.");
+
+            if (!match(TokenType.POUND)) {
+                template = printableExpression();
+            } else {
+                return Statement.NoOp.of();
+            }
+        }
+
+        return Statement.TemplateStatement.of(template);
+    }
+
+    private Template plainTextStatement(boolean trim) throws ParserException {
+        if (isAtEnd()) {
+            return Template.Empty.of();
+        }
+
+        Token token = consume(TokenType.STRING, "Expected plain text after '}}'.");
+
+        String text = token.getLiteral().toString();
+        if (trim && text.charAt(0) == '\n') {
+            text = text.substring(1);
+        }
+
+        Template next = Template.Empty.of();
+        if (!isAtEnd()) {
+            consume(TokenType.DOUBLE_LEFT_BRACE, "Expected '{{' after template text.");
+
+            if (!match(TokenType.POUND)) {
+                next = printableExpression();
+            }
+        }
+
+        return Template.PlainText.of(text, next);
+    }
+
+    private Template printableExpression() throws ParserException {
+        Expression expression = expression();
+
+        boolean trim = match(TokenType.MINUS);
+        consume(TokenType.DOUBLE_RIGHT_BRACE, "Expected closing '}}' after printable expression");
+
+        Template next = Template.Empty.of();
+
+        if (check(TokenType.STRING)) {
+            next = plainTextStatement(trim);
+        }
+
+        return Template.PrintableExpression.of(expression, next);
     }
 
     private Statement forEachStatement() throws ParserException {
@@ -125,7 +191,7 @@ public class Parser {
 
     private Statement returnStatement() throws ParserException {
         Token keyword = previous();
-        Expression value = null;
+        Expression value = Expression.NoOp.of();
         if (!check(TokenType.SEMICOLON)) {
             value = expression();
         }
@@ -151,7 +217,7 @@ public class Parser {
         consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
 
         Statement thenBranch = statement();
-        Statement elseBranch = null;
+        Statement elseBranch = Statement.NoOp.of();
         if (match(TokenType.ELSE)) {
             elseBranch = statement();
         }

@@ -9,7 +9,7 @@ public class ASTPipeline {
         Tokenizer tokenizer = new Tokenizer(input, isTemplate);
         List<Token> tokens = tokenizer.scanTokens();
 
-        Parser parser = new Parser(tokens);
+        Parser parser = new Parser(tokens, isTemplate);
         return parser.parse();
     }
 }

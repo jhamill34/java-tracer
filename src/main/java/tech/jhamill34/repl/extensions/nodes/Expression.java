@@ -104,6 +104,15 @@ public abstract class Expression {
         }
     }
 
+    @RequiredArgsConstructor(staticName = "of")
+    @Getter
+    public static class NoOp extends Expression {
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitNoOp(this);
+        }
+    }
+
     public interface Visitor<R> {
         R visitBinary(Binary expr);
         R visitUnary(Unary expr);
@@ -113,5 +122,6 @@ public abstract class Expression {
         R visitCall(Call expr);
         R visitAssign(Assign expr);
         R visitGet(Get expr);
+        R visitNoOp(NoOp expr);
     }
 }
