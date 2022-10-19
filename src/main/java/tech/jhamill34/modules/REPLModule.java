@@ -58,5 +58,8 @@ public class REPLModule extends AbstractModule {
         commandBinder.addBinding("expand").to(ExpandCommand.class).in(Singleton.class);
         commandBinder.addBinding("math").to(MathCommand.class).in(Singleton.class);
         commandBinder.addBinding("cmp").to(CompareCommand.class).in(Singleton.class);
+        commandBinder.addBinding("queue").to(QueueCommand.class).in(Singleton.class);
+        commandBinder.addBinding("next").to(NextCommand.class).in(Singleton.class);
+        commandBinder.addBinding("offer").to(EnqueueCommand.class).in(Singleton.class);
     }
 }
