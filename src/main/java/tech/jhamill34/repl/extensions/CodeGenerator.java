@@ -449,6 +449,27 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
                 "print",
                 "return"
         ));
+
+        functions.add("queue");
+        commands.addAll(Arrays.asList(
+                "queue:",
+                "queue",
+                "return"
+        ));
+
+        functions.add("next");
+        commands.addAll(Arrays.asList(
+                "next:",
+                "next",
+                "return"
+        ));
+
+        functions.add("offer");
+        commands.addAll(Arrays.asList(
+                "offer:",
+                "offer",
+                "return"
+        ));
     }
 
     private void executeBlock(List<Statement> statements, Environment env) {
