@@ -22,7 +22,6 @@ public class ControlFlowAnalyzer extends Analyzer<IdValue> {
 
     @Override
     protected boolean newControlFlowExceptionEdge(int insnIndex, int successorIndex) {
-        connect(insnIndex, successorIndex);
         return true;
     }
 
