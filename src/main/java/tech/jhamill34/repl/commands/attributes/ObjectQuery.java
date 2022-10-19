@@ -19,10 +19,10 @@ public class ObjectQuery implements Query {
             Method method = obj.getClass().getDeclaredMethod(getter);
             return method.invoke(obj);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new QueryException("Attribute not found: " + input, e);
+            throw new QueryException("Attribute not found, can't access method on entity: " + input, e);
         } catch (NoSuchMethodException e) {
             if (resolver == null) {
-                throw new QueryException("Attribute not found: " + input, e);
+                throw new QueryException("Attribute not found, no resolver: " + input, e);
             }
         }
 
@@ -31,7 +31,7 @@ public class ObjectQuery implements Query {
 
             return method.invoke(resolver, obj);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new QueryException("Attribute not found: " + input, e);
+            throw new QueryException("Attribute not found, resolver doesn't have property: " + input, e);
         }
     }
 }

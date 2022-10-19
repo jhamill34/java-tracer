@@ -1,5 +1,6 @@
 package tech.jhamill34.resolvers;
 
+import com.google.common.graph.Graph;
 import com.google.inject.Inject;
 import tech.jhamill34.analyze.HeapStore;
 import tech.jhamill34.analyze.IdValue;
@@ -7,8 +8,10 @@ import tech.jhamill34.entities.EntityUtilities;
 import tech.jhamill34.entities.InstructionEntity;
 import tech.jhamill34.entities.MethodEntity;
 import tech.jhamill34.tree.FieldRepository;
+import tech.jhamill34.tree.InstructionRepository;
 import tech.jhamill34.tree.MethodRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +25,8 @@ public class InstructionResolver {
     @Inject
     private FieldRepository fieldRepository;
 
+    @Inject
+    private InstructionRepository instructionRepository;
 
     public List<IdValue> getProduced(InstructionEntity parent) {
         return heapStore.findProducedByInstruction(parent.getId())
@@ -56,5 +61,10 @@ public class InstructionResolver {
 
     public String getOpCodeName(InstructionEntity parent) {
         return EntityUtilities.convertOpcode(parent.getOpCode());
+    }
+
+    public List<Integer> getNext(InstructionEntity parent) {
+        Graph<Integer> controlFlow = instructionRepository.getControlFlowForInvoker(parent.getInvokerId());
+        return new ArrayList<>(controlFlow.successors(parent.getIndex()));
     }
 }

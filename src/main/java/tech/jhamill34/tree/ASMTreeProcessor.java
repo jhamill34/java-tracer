@@ -62,12 +62,11 @@ public class ASMTreeProcessor implements BytecodeTreeProcessor {
         for (MethodNode methodNode : node.methods) {
             int methodId = methodRepository.save(transformMethod(methodNode, classId));
 
+            MutableGraph<Integer> controlFlow = GraphBuilder.directed().allowsSelfLoops(true).build();
             try {
-                MutableGraph<Integer> controlFlow = GraphBuilder.directed().allowsSelfLoops(true).build();
                 Interpreter<IdValue> interpreter = interpreterFactory.createShallowInterpreter();
                 Analyzer<IdValue> analyzer = analyzerFactory.createAnalyzer(interpreter, controlFlow);
                 analyzer.analyze(node.name, methodNode);
-                instructionRepository.recordControlFlow(methodId, controlFlow);
             } catch (AnalyzerException e) {
                 logger.warn("Unable to analyze methodId " + methodId, e);
             }
@@ -76,6 +75,7 @@ public class ASMTreeProcessor implements BytecodeTreeProcessor {
 
             int currentLineNumber = -1;
             for (int i = 0; i < methodNode.instructions.size(); i++) {
+                controlFlow.addNode(i);
                 AbstractInsnNode insnNode = methodNode.instructions.get(i);
                 if (insnNode instanceof LineNumberNode) {
                     LineNumberNode lineNumberNode = (LineNumberNode) insnNode;
@@ -129,6 +129,7 @@ public class ASMTreeProcessor implements BytecodeTreeProcessor {
                 int instructionId = instructionRepository.save(transformInstruction(insnNode, methodId, currentLineNumber, i, referenceId, referenceType));
                 heapStore.saveInstruction(instructionId, insnNode);
             }
+            instructionRepository.recordControlFlow(methodId, controlFlow);
         }
     }
 

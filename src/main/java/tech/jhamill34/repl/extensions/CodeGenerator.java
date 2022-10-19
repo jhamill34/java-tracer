@@ -284,7 +284,7 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
         commands.add("condition" + currentLabel + ":");
         commands.add("load " + currentEnv.find("_idx"));
         commands.add("load " + currentEnv.find("_total"));
-        commands.add("cmp =");
+        commands.add("cmp >=");
         commands.add("jmp end" + currentLabel);
         commands.add("goto body" + currentLabel);
         commands.add("end" + currentLabel + ":");

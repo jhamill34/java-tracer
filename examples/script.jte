@@ -38,40 +38,46 @@ Complexity={{ method.complexity }}
 {{#
         }
 
-        if (i.opCode >= 0) {
-            var produced = i.produced;
-            var consumed = i.consumed;
+        var produced = i.produced;
+        var consumed = i.consumed;
 -}}
-    - {{ i.opCodeName }}
+    - {{ i.index }}: {{ i.opCodeName }}
 {{#
-            if (i.referenceId > 0) {
-                var ref = i.reference;
+        if (i.referenceId > 0) {
+            var ref = i.reference;
 -}}
         - {{ ref.returnType }} {{ ref.owner.className }}.{{ ref.name }}({{ argsString(ref.parameters) }})
 {{#
-            }
+        }
 
-            if (produced.size > 0) {
+        if (produced.size > 0) {
 -}}
         - Produced
 {{#
-                for (var p in produced) {
+            for (var p in produced) {
 -}}
             - {{ p.id }}
 {{#
-                }
             }
+        }
 
-            if (consumed.size > 0) {
+        if (consumed.size > 0) {
 -}}
         - Consumed
 {{#
-                for (var c in consumed) {
+            for (var c in consumed) {
 -}}
             - {{ c.id }}
 {{#
-                }
             }
+        }
+-}}
+        - Next
+{{#
+        for (var n in i.next) {
+-}}
+            - {{ n }}
+{{#
         }
     }
 -}}
