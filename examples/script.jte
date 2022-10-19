@@ -1,5 +1,5 @@
 {{#
-    // This template creats a markdown summary of a provided
+    // This template creates a markdown summary of a provided
     // method that is simulated. The contents consist of
     // instructions and referenced methods/fields and heap values
     // that are either produced or consumed in each instruction
