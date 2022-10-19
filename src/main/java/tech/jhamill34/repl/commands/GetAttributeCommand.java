@@ -41,6 +41,12 @@ public class GetAttributeCommand implements Command {
             }
         } else if (top instanceof List) {
             List<?> items = (List<?>) top;
+
+            if (attribute.equals("size")) {
+                stack.push(items.size());
+                return "Success";
+            }
+
             try {
                 int index = Integer.parseInt(attribute);
                 stack.push(items.get(index));
