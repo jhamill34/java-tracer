@@ -1,4 +1,4 @@
-package tech.jhamill34.repl.commands.descriptions;
+package tech.jhamill34.entities;
 
 import lombok.experimental.UtilityClass;
 import org.objectweb.asm.Opcodes;
@@ -6,12 +6,13 @@ import org.objectweb.asm.Type;
 import tech.jhamill34.entities.FieldEntity;
 import tech.jhamill34.entities.MethodEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @UtilityClass
-public class DisplayUtilities implements Opcodes {
+public class EntityUtilities implements Opcodes {
     public static String convertClassName(String internalName) {
         return internalName.replace('/', '.');
     }
@@ -29,49 +30,54 @@ public class DisplayUtilities implements Opcodes {
         return Type.getType(fieldEntity.getDescriptor()).getClassName();
     }
 
-    public static String appendAccess(final int accessFlags) {
-        StringBuilder stringBuilder = new StringBuilder();
+    public static List<String> convertAccessList(int accessFlags) {
+        List<String> access = new ArrayList<>();
         if ((accessFlags & Opcodes.ACC_PUBLIC) != 0) {
-            stringBuilder.append("public ");
+            access.add("public");
         }
         if ((accessFlags & Opcodes.ACC_PRIVATE) != 0) {
-            stringBuilder.append("private ");
+            access.add("private");
         }
         if ((accessFlags & Opcodes.ACC_PROTECTED) != 0) {
-            stringBuilder.append("protected ");
+            access.add("protected");
         }
         if ((accessFlags & Opcodes.ACC_FINAL) != 0) {
-            stringBuilder.append("final ");
+            access.add("final");
         }
         if ((accessFlags & Opcodes.ACC_STATIC) != 0) {
-            stringBuilder.append("static ");
+            access.add("static");
         }
         if ((accessFlags & Opcodes.ACC_SYNCHRONIZED) != 0) {
-            stringBuilder.append("synchronized ");
+            access.add("synchronized");
         }
         if ((accessFlags & Opcodes.ACC_VOLATILE) != 0) {
-            stringBuilder.append("volatile ");
+            access.add("volatile");
         }
         if ((accessFlags & Opcodes.ACC_TRANSIENT) != 0) {
-            stringBuilder.append("transient ");
+            access.add("transient");
         }
         if ((accessFlags & Opcodes.ACC_ABSTRACT) != 0) {
-            stringBuilder.append("abstract ");
+            access.add("abstract");
         }
         if ((accessFlags & Opcodes.ACC_STRICT) != 0) {
-            stringBuilder.append("strictfp ");
+            access.add("strictfp");
         }
         if ((accessFlags & Opcodes.ACC_SYNTHETIC) != 0) {
-            stringBuilder.append("synthetic ");
+            access.add("synthetic");
         }
         if ((accessFlags & Opcodes.ACC_MANDATED) != 0) {
-            stringBuilder.append("mandated ");
+            access.add("mandated");
         }
         if ((accessFlags & Opcodes.ACC_ENUM) != 0) {
-            stringBuilder.append("enum ");
+            access.add("enum");
         }
 
-        return stringBuilder.toString();
+
+        return access;
+    }
+
+    public static String appendAccess(final int accessFlags) {
+        return String.join(" ", convertAccessList(accessFlags));
     }
 
     public static String convertOpcode(int opCode) {

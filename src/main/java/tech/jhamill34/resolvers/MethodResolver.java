@@ -4,6 +4,7 @@ import com.google.common.graph.Graph;
 import com.google.inject.Inject;
 import org.objectweb.asm.Type;
 import tech.jhamill34.entities.ClassEntity;
+import tech.jhamill34.entities.EntityUtilities;
 import tech.jhamill34.entities.InstructionEntity;
 import tech.jhamill34.entities.MethodEntity;
 import tech.jhamill34.tree.ClassRepository;
@@ -45,11 +46,14 @@ public class MethodResolver {
     }
 
     public String getReturnType(MethodEntity methodEntity) {
-        return Type.getReturnType(methodEntity.getDescriptor()).getClassName();
+        return EntityUtilities.convertReturnType(methodEntity);
     }
 
     public List<String> getParameters(MethodEntity methodEntity) {
-        return Arrays.stream(Type.getArgumentTypes(methodEntity.getDescriptor()))
-                .map(Type::getClassName).collect(Collectors.toList());
+        return EntityUtilities.convertArguments(methodEntity);
+    }
+
+    public List<String> getAccessList(MethodEntity methodEntity) {
+        return EntityUtilities.convertAccessList(methodEntity.getAccess());
     }
 }

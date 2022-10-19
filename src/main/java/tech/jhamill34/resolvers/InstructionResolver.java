@@ -3,6 +3,7 @@ package tech.jhamill34.resolvers;
 import com.google.inject.Inject;
 import tech.jhamill34.analyze.HeapStore;
 import tech.jhamill34.analyze.IdValue;
+import tech.jhamill34.entities.EntityUtilities;
 import tech.jhamill34.entities.InstructionEntity;
 import tech.jhamill34.entities.MethodEntity;
 import tech.jhamill34.tree.FieldRepository;
@@ -51,5 +52,9 @@ public class InstructionResolver {
         }
 
         return null;
+    }
+
+    public String getOpCodeName(InstructionEntity parent) {
+        return EntityUtilities.convertOpcode(parent.getOpCode());
     }
 }

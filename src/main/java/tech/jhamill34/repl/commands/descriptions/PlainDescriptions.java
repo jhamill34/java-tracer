@@ -2,11 +2,7 @@ package tech.jhamill34.repl.commands.descriptions;
 
 import org.objectweb.asm.Opcodes;
 import tech.jhamill34.analyze.IdValue;
-import tech.jhamill34.entities.ClassEntity;
-import tech.jhamill34.entities.EntityVisitor;
-import tech.jhamill34.entities.FieldEntity;
-import tech.jhamill34.entities.InstructionEntity;
-import tech.jhamill34.entities.MethodEntity;
+import tech.jhamill34.entities.*;
 
 public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
     @Override
@@ -14,14 +10,14 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
         StringBuilder sb = new StringBuilder();
 
         sb.append("ID: ").append(classEntity.getId()).append('\n');
-        sb.append("Class: ").append(DisplayUtilities.convertClassName(classEntity.getName())).append('\n');
+        sb.append("Class: ").append(EntityUtilities.convertClassName(classEntity.getName())).append('\n');
         sb.append("Package: ").append(classEntity.getPackageName()).append('\n');
 
         if (classEntity.getSignature() != null) {
             sb.append("Signature: ").append(classEntity.getSignature()).append('\n');
         }
 
-        sb.append("Access: ").append(DisplayUtilities.appendAccess(classEntity.getAccess())).append('\n');
+        sb.append("Access: ").append(EntityUtilities.appendAccess(classEntity.getAccess())).append('\n');
 
         return sb.toString();
     }
@@ -31,7 +27,7 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
         StringBuilder sb = new StringBuilder();
 
         sb.append("ID: ").append(instructionEntity.getId()).append('\n');
-        sb.append("Op Code: ").append(DisplayUtilities.convertOpcode(instructionEntity.getOpCode())).append('\n');
+        sb.append("Op Code: ").append(EntityUtilities.convertOpcode(instructionEntity.getOpCode())).append('\n');
         sb.append("Line#: ").append(instructionEntity.getLineNumber()).append('\n');
         sb.append("Index: ").append(instructionEntity.getIndex()).append('\n');
 
@@ -45,14 +41,14 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
         sb.append("ID: ").append(methodEntity.getId()).append('\n');
         sb.append("Name: ").append(methodEntity.getName()).append('\n');
 
-        sb.append("Argument Types: ").append(DisplayUtilities.convertArguments(methodEntity)).append('\n');
-        sb.append("Return Type: ").append(DisplayUtilities.convertReturnType(methodEntity)).append('\n');
+        sb.append("Argument Types: ").append(EntityUtilities.convertArguments(methodEntity)).append('\n');
+        sb.append("Return Type: ").append(EntityUtilities.convertReturnType(methodEntity)).append('\n');
 
         if (methodEntity.getSignature() != null) {
             sb.append("Signature: ").append(methodEntity.getSignature()).append('\n');
         }
 
-        sb.append("Access: ").append(DisplayUtilities.appendAccess(methodEntity.getAccess())).append('\n');
+        sb.append("Access: ").append(EntityUtilities.appendAccess(methodEntity.getAccess())).append('\n');
 
         return sb.toString();
     }
@@ -64,13 +60,13 @@ public class PlainDescriptions implements EntityVisitor<String>, Opcodes {
         sb.append("ID: ").append(fieldEntity.getId()).append('\n');
         sb.append("Name: ").append(fieldEntity.getName()).append('\n');
 
-        sb.append("Type: ").append(DisplayUtilities.convertFieldType(fieldEntity)).append('\n');
+        sb.append("Type: ").append(EntityUtilities.convertFieldType(fieldEntity)).append('\n');
 
         if (fieldEntity.getSignature() != null) {
             sb.append("Signature: ").append(fieldEntity.getSignature()).append('\n');
         }
 
-        sb.append("Access: ").append(DisplayUtilities.appendAccess(fieldEntity.getAccess()));
+        sb.append("Access: ").append(EntityUtilities.appendAccess(fieldEntity.getAccess()));
         return sb.toString();
     }
 

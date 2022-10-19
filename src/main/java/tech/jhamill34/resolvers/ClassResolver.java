@@ -2,6 +2,7 @@ package tech.jhamill34.resolvers;
 
 import com.google.inject.Inject;
 import tech.jhamill34.entities.ClassEntity;
+import tech.jhamill34.entities.EntityUtilities;
 import tech.jhamill34.entities.FieldEntity;
 import tech.jhamill34.entities.MethodEntity;
 import tech.jhamill34.tree.ClassRepository;
@@ -63,5 +64,13 @@ public class ClassResolver {
                 .stream()
                 .map(id -> methodRepository.findById(id))
                 .collect(Collectors.toList());
+    }
+
+    public String getClassName(ClassEntity parent) {
+        return EntityUtilities.convertClassName(parent.getName());
+    }
+
+    public List<String> getAccessList(ClassEntity parent) {
+        return EntityUtilities.convertAccessList(parent.getAccess());
     }
 }
