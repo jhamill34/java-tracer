@@ -1,5 +1,7 @@
 package tech.jhamill34.repl;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.inject.Inject;
 import tech.jhamill34.pico.ScriptHandler;
 import tech.jhamill34.reports.Reporter;
@@ -55,7 +57,7 @@ public class SimpleScriptHandler implements ScriptHandler {
 
         int numCommands = Integer.parseInt(commands[current++]);
         int ip = current;
-        Map<String, Integer> labelIndex = new HashMap<>();
+        BiMap<String, Integer> labelIndex = HashBiMap.create();
         for (int i = 0; i < numCommands; i++, current++) {
             String line = commands[current];
             if (line.contains(LABEL)) {
@@ -114,6 +116,19 @@ public class SimpleScriptHandler implements ScriptHandler {
             }
         } catch (Exception e) {
             System.err.println("Something went wrong...");
+            for (int i = 0; i < commands.length; i++) {
+                String line = i + ":" + commands[i];
+
+                if (commands[i].isEmpty() && labelIndex.inverse().containsKey(i)) {
+                    line += labelIndex.inverse().get(i) + ":";
+                }
+
+                if (i == ip) {
+                    line += " <--- Error happened here";
+                }
+
+                System.err.println(line);
+            }
             e.printStackTrace();
         }
     }
