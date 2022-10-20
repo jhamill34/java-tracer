@@ -21,6 +21,7 @@
     simulate(class, method);
 
     var values = allValues();
+    values = sort(values, "id");
 
     for (var v in values) {
 -}}

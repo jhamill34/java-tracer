@@ -62,5 +62,6 @@ public class REPLModule extends AbstractModule {
         commandBinder.addBinding("next").to(NextCommand.class).in(Singleton.class);
         commandBinder.addBinding("offer").to(EnqueueCommand.class).in(Singleton.class);
         commandBinder.addBinding("list").to(ListCommand.class).in(Singleton.class);
+        commandBinder.addBinding("sort").to(SortCommand.class).in(Singleton.class);
     }
 }

@@ -488,6 +488,13 @@ public class CodeGenerator implements Program.Visitor<Void>, Statement.Visitor<V
                 "list V",
                 "return"
         ));
+
+        functions.add("sort");
+        commands.addAll(Arrays.asList(
+                "sort:",
+                "sort",
+                "return"
+        ));
     }
 
     private void executeBlock(List<Statement> statements, Environment env) {
