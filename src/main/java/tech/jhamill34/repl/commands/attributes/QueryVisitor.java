@@ -7,14 +7,14 @@ import tech.jhamill34.entities.EntityVisitor;
 import tech.jhamill34.entities.FieldEntity;
 import tech.jhamill34.entities.InstructionEntity;
 import tech.jhamill34.entities.MethodEntity;
-import tech.jhamill34.resolvers.ClassResolver;
-import tech.jhamill34.resolvers.InstructionResolver;
-import tech.jhamill34.resolvers.MethodResolver;
-import tech.jhamill34.resolvers.ValueResolver;
+import tech.jhamill34.resolvers.*;
 
 public class QueryVisitor implements EntityVisitor<Query> {
     @Inject
     private ClassResolver classResolver;
+
+    @Inject
+    private FieldResolver fieldResolver;
 
     @Inject
     private MethodResolver methodResolver;
@@ -42,7 +42,7 @@ public class QueryVisitor implements EntityVisitor<Query> {
 
     @Override
     public Query visitFieldEntity(FieldEntity fieldEntity) {
-        return ObjectQuery.of(fieldEntity, null);
+        return ObjectQuery.of(fieldEntity, fieldResolver);
     }
 
     @Override

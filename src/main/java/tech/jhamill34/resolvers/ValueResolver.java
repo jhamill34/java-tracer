@@ -46,4 +46,8 @@ public class ValueResolver {
 
         return null;
     }
+
+    public String getType(IdValue parent) {
+        return parent.delegate.getType().getClassName();
+    }
 }
